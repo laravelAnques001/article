@@ -20,16 +20,19 @@ class Article extends Model
         'description',
         'image_type',
         'media',
+        'thumbnail',
         'deleted_at',
         'status',
     ];
 
     protected $appends = [
         'media_url',
+        'thumbnail_url',
         'like_count',
         'share_count',
         'impressions_count',
         'bookmark',
+        'like',
         'day_ago',
     ];
 
@@ -40,6 +43,11 @@ class Article extends Model
     public function getMediaUrlAttribute()
     {
         return $this->media ? asset(Storage::url($this->media)) : '';
+    }
+
+    public function getThumbnailUrlAttribute()
+    {
+        return $this->thumbnail ? asset(Storage::url($this->thumbnail)) : '';
     }
 
     public function getDayAgoAttribute()
@@ -80,6 +88,11 @@ class Article extends Model
     public function getBookmarkAttribute()
     {
         return $this->hasMany(ArticleLikeShare::class, 'article_id')->where('bookmark', 1)->where('user_id', auth()->id())->count() ?? 0;
+    }
+
+    public function getLikeAttribute()
+    {
+        return $this->hasMany(ArticleLikeShare::class, 'article_id')->where('like', 1)->where('user_id', auth()->id())->count() ?? 0;
     }
 
     public static function boot()

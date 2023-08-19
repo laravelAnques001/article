@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PollsController;
+use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\TextUI\XmlConfiguration\Group;
 
@@ -52,6 +53,9 @@ Route::middleware(['auth:api'])->Group(function () {
     Route::post('advertise', [AdvertiseController::class, 'store']);
     // Route::get('advertise/{advertise}', [AdvertiseController::class, 'show']);
 
-    Route::get('setting/{key}', [AuthController::class, 'setting']);
+    // Route::get('setting/{key}', [AuthController::class, 'setting']);
+
+    Route::get('wallet', [WalletController::class,'index']);
+    Route::post('wallet', [WalletController::class,'store']);
 
 });

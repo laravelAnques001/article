@@ -7,10 +7,12 @@ use App\Http\Requests\ArticleRequest;
 use App\Models\Article;
 use App\Models\ArticleLikeShare;
 use App\Models\CategoryUser;
+use FFMpeg;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ArticleController extends Controller
@@ -22,19 +24,24 @@ class ArticleController extends Controller
      */
     public function index(Request $request)
     {
+        $userId = auth()->id();
         $search = isset($request->search) ? $request->search : null;
         $myArticle = isset($request->myArticle) ? $request->myArticle : null;
-        $topStories = isset($request->topStories) ? $request->topStories : null;
-        $userCategory = CategoryUser::where('user_id', auth()->id())->pluck('category_id')->toArray();
+        // $topStories = isset($request->topStories) ? $request->topStories : null;
+        $relevanceStories = isset($request->relevanceStories) ? $request->relevanceStories : null;
+        $trending = isset($request->trending) ? $request->trending : null;
+        $bookmarked = isset($request->bookmarked) ? $request->bookmarked : null;
+        $userCategory = CategoryUser::where('user_id', $userId)->pluck('category_id')->toArray();
 
-        $articles = Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'status')
+        $articles = Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status')
             ->with(['user' => function ($q) {
                 $q->select('name', 'email', 'id', 'image');
             }])
-            ->with(['category' => function ($q) use ($userCategory) {
+            ->with(['category' => function ($q) {
                 $q->select('id', 'name', 'image');
 
-            }])->whereIn('category_id', $userCategory);
+            }])
+            ->whereIn('category_id', $userCategory);
 
         if ($search) {
             $articlesData = $articles->where('title', 'like', '%' . $search . '%')
@@ -52,12 +59,17 @@ class ArticleController extends Controller
                 ->orderByDesc('id')
                 ->paginate(20);
         } elseif ($myArticle) {
-            $orderDataDesc = $articles->where('user_id', auth()->id())->whereNull('deleted_at')->orderByDesc('id')->get();
+            $orderDataDesc = $articles->where('user_id', $userId)->whereNull('deleted_at')->orderByDesc('id')->get();
             $articlesData = $this->paginate('myArticle=1', $orderDataDesc, 20);
-        } elseif ($topStories) {
+        } elseif ($bookmarked) {
+            $orderDataDesc = $articles->whereNull('deleted_at')->whereHas('articleLikeShare', function ($q) use ($userId) {
+                $q->where('bookmark', 1)->where('user_id', $userId);
+            })->orderByDesc('id')->get();
+            $articlesData = $this->paginate('bookmarked=1', $orderDataDesc, 20);
+        } elseif ($trending) {
             $articleData = $articles->whereNull('deleted_at')->orderByDesc('id')->get();
             $orderData = new Collection($articleData);
-            $orderDataDesc = $orderData->sortByDesc('like_count')->sortByDesc('share_count');
+            $orderDataDesc = $orderData->sortByDesc('like_count')->sortByDesc('share_count')->sortByDesc('impressions_count');
             $articlesData = $this->paginate('topStories=1', $orderDataDesc, 20);
         } else {
             $articlesData = $articles->whereNull('deleted_at')->orderByDesc('id')->paginate(20);
@@ -86,7 +98,18 @@ class ArticleController extends Controller
         $validated = $request->validated();
         $image = isset($validated['media']) ? $validated['media'] : null;
         if ($image) {
-            $validated['media'] = $image->store('public/article');
+            $validated['media'] = $image->store('public/storage/article');
+            if ($request->image_type) {
+                $filePath = substr($validated['media'], 7);
+                $storagePath = 'article/thumbnail/' . time() . ".png";
+                FFMpeg::fromDisk('public')
+                    ->open($filePath)
+                    ->getFrameFromSeconds(10)
+                    ->export()
+                    ->toDisk('public')
+                    ->save($storagePath);
+                $validated['thumbnail'] = 'public/' . $storagePath;
+            }
         }
         $article = Article::create($validated);
         // $data = [
@@ -115,10 +138,10 @@ class ArticleController extends Controller
         // $result = curl_exec($ch);
         // curl_close($ch);
 
-        // $fcmTokens = User::whereNotNull('device_token')->pluck('device_token')->toArray();
-        // Larafirebase::withTitle($request->title)
-        //     ->withBody($request->description)
-        //     ->sendMessage($fcmTokens);
+        $fcmTokens = User::whereNotNull('device_token')->pluck('device_token')->toArray();
+        Larafirebase::withTitle($request->title)
+            ->withBody($request->description)
+            ->sendMessage($fcmTokens);
 
         return $this->sendResponse($article->id, 'Article Created Successfully.');
     }
@@ -155,15 +178,33 @@ class ArticleController extends Controller
         $validated = $request->validated();
         // return $request->media;
         $image = isset($validated['media']) ? $validated['media'] : null;
-        $oldImage = isset($article->media) ? $article->media : null;
+        $oldMedia = isset($article->media) ? $article->media : null;
+        $oldThumbnail = isset($article->thumbnail) ? $article->thumbnail : null;
         if ($image) {
-            if ($oldImage) {
-                $fileCheck = storage_path('app/' . $oldImage);
+            if ($oldMedia) {
+                $fileCheck = storage_path('app/' . $oldMedia);
+                if (file_exists($fileCheck)) {
+                    unlink($fileCheck);
+                }
+            }
+            if ($oldThumbnail) {
+                $fileCheck = storage_path('app/' . $oldThumbnail);
                 if (file_exists($fileCheck)) {
                     unlink($fileCheck);
                 }
             }
             $validated['media'] = $image->store('public/article');
+            if ($request->image_type) {
+                $filePath = substr($validated['media'], 7);
+                $storagePath = 'article/thumbnail/' . time() . ".png";
+                FFMpeg::fromDisk('public')
+                    ->open($filePath)
+                    ->getFrameFromSeconds(10)
+                    ->export()
+                    ->toDisk('public')
+                    ->save($storagePath);
+                $validated['thumbnail'] = 'public/' . $storagePath;
+            }
         }
         // return $validated;
         $article->fill($validated)->save();
@@ -203,74 +244,40 @@ class ArticleController extends Controller
 
         $articleLSI = ArticleLikeShare::where('user_id', auth()->id())->where('article_id', $request->article_id)->first();
 
+        $impressions = isset($request->impressions) ? $request->impressions : 0;
+        $like = isset($request->like) ? $request->like : 0;
+        $share = isset($request->share) ? $request->share : 0;
+        $bookmark = isset($request->bookmark) ? $request->bookmark : 0;
+        $report = isset($request->report) ? $request->report : null;
         if (is_null($articleLSI)) {
             ArticleLikeShare::create([
                 'article_id' => $request->article_id,
                 'user_id' => auth()->id(),
-                'impressions' => $request->impressions ?? 0,
-                'like' => $request->like ?? 0,
-                'share' => $request->share ?? 0,
-                'bookmark' => $request->bookmark ?? 0,
+                'impressions' => $impressions,
+                'like' => $like,
+                'share' => $share,
+                'bookmark' => $bookmark,
+                'report' => $report,
             ]);
         } else {
-            if (isset($request->impressions)) {
+            if ($impressions) {
                 $articleLSI->increment('impressions', 1);
             }
-
-            if (isset($request->like)) {
-                $articleLSI['like'] = $request->like;
+            if ($like) {
+                $articleLSI['like'] = $like;
             }
-
-            if (isset($request->share)) {
-                $articleLSI['share'] = $request->share;
+            if ($share) {
+                $articleLSI['share'] = $share;
             }
-
-            if (isset($request->bookmark)) {
-                $articleLSI['bookmark'] = $request->bookmark;
+            if ($bookmark) {
+                $articleLSI['bookmark'] = $bookmark;
+            }
+            if ($report) {
+                $articleLSI['report'] = $report;
             }
             $articleLSI->save();
         }
 
         return $this->sendResponse([], 'Like-Share Article Successfully.');
     }
-
-    // public function myArticle(Request $request)
-    // {
-    //     $search = $request->search;
-    //     if ($search) {
-    //         $articles = Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'status')
-    //             ->with(['user' => function ($q) {
-    //                 $q->select('name', 'email', 'id', 'image');
-    //             }])
-    //             ->with(['category' => function ($q) {
-    //                 $q->select('id', 'name', 'image');
-    //             }])
-    //             ->where('title', 'like', '%' . $search . '%')
-    //             ->orWhere('link', 'like', '%' . $search . '%')
-    //             ->orWhere('tags', 'like', '%' . $search . '%')
-    //             ->orWhere('image_type', 'like', '%' . $search . '%')
-    //             ->orWhere('description', 'like', '%' . $search . '%')
-    //             ->orWhereHas('user', function ($q) use ($search) {
-    //                 $q->where('name', 'like', '%' . $search . '%');
-    //             })
-    //             ->orWhereHas('category', function ($q) use ($search) {
-    //                 $q->where('name', 'like', '%' . $search . '%');
-    //             })
-    //             ->whereNull('deleted_at')
-    //             ->where('user_id', auth()->id())
-    //             ->paginate(10);
-    //     } else {
-    //         $articles = Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'status')
-    //             ->with(['user' => function ($q) {
-    //                 $q->select('name', 'email', 'id', 'image');
-    //             }])
-    //             ->with(['category' => function ($q) {
-    //                 $q->select('id', 'name', 'image');
-    //             }])
-    //             ->where('user_id', auth()->id())
-    //             ->whereNull('deleted_at')->paginate(10);
-    //     }
-    //     // return $this->sendResponse(ArticleResource::collection($articles), 'Article List Get Successfully.');
-    //     return $this->sendResponse($articles, 'Your Article List Get Successfully.');
-    // }
 }

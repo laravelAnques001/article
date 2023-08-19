@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-    <h3>Privacy Policy</h3>
+    <h3>Turm And Condition</h3>
 
 
     <p>This page is used to inform visitors regarding my policies with the collection, use, and disclosure of Personal

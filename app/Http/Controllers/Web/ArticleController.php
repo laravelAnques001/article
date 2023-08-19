@@ -142,7 +142,7 @@ class ArticleController extends Controller
 
     public function getArticleData()
     {
-        $data = Article::with('category','user')->whereNull('deleted_at')->orderBy('id', 'desc');
+        $data = Article::with('category', 'user')->whereNull('deleted_at')->orderBy('id', 'desc');
 
         return DataTables::of($data)
             ->addColumn('active', function ($data) {
@@ -169,17 +169,23 @@ class ArticleController extends Controller
             })
             ->editColumn('image', function ($data) {
                 if ($data->image_type == 0) {
-                    return '<img src="' . $data->media_url . '" alt="Category Image" width="60" height="60" class="img-thumbnail">';
+                    if ($data->media_url) {
+                        return '<img src="' . $data->media_url . '" alt="Article Image" width="60" height="60" class="img-thumbnail">';
+                    }
+
                 } elseif ($data->image_type == 1) {
-                    return '<video width="100" height="100" controls> <source src="' . $data->media_url . '" type="Article Video"></video>';
+                    if ($data->thumbnail_url) {
+                        return '<img src="' . $data->thumbnail_url . '" alt="Article Image" width="60" height="60" class="img-thumbnail">';
+                    }
                 }
                 return;
-            })->rawColumns(['date', 'action', 'category_name', 'image', 'link','active','user_id'])
+            })->rawColumns(['date', 'action', 'category_name', 'image', 'link', 'active', 'user_id'])
             ->addIndexColumn()
             ->toJson();
     }
 
-    public function status($id, $status){
+    public function status($id, $status)
+    {
         $article = Article::where('id', base64_decode($id))->update(['status' => $status]);
         if ($article) {
             echo 1;

@@ -38,6 +38,15 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+
+Route::get('privacy', function () {
+    return view('privacy');
+});
+
+Route::get('term-condition', function () {
+    return view('termCondition');
+});
+
 Route::group(['middleware' => 'auth'], function () {
 
     Route::get('dashboard', [DashBoardController::class, 'dashboard'])->name('dashboard');
@@ -64,4 +73,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('wallet/getData', [WalletController::class, 'getWalletData'])->name('admin.wallet.getData');
     Route::post('polls/getData', [PollsController::class, 'getPollsData'])->name('admin.polls.getData');
     Route::post('setting/getData', [SettingController::class, 'getSettingData'])->name('admin.setting.getData');
+
 });

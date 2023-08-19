@@ -25,7 +25,6 @@ class ArticleRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'category_id' => ['required', Rule::exists('categories', 'id')->whereNull('deleted_at')],
             'title' => 'required|string',
             'link' => 'nullable|string',
             'tags' => 'nullable|string|min:3',
@@ -33,7 +32,13 @@ class ArticleRequest extends FormRequest
             'image_type' => 'nullable|in:0,1',
             // 'media' => 'nullable|file',
             'media' => 'nullable|file|mimes:jpeg,jpg,png,bmp,gif,svg,mp4,ogx,oga,ogv,ogg,webm,video/*',
+            'status' => 'nullable|in:In-Review,Approved,Rejected',
         ];
+        if ($this->isMethod('POST')) {
+            $rules['category_id'] = ['required', Rule::exists('categories', 'id')->whereNull('deleted_at')];
+        } else {
+            $rules['category_id'] = ['nullable', Rule::exists('categories', 'id')->whereNull('deleted_at')];
+        }
         return $rules;
     }
 }

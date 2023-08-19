@@ -32,13 +32,13 @@ class AdvertiseController extends Controller
                 ->orWhere('start_date', 'like', '%' . $search . '%')
                 ->orWhere('end_date', 'like', '%' . $search . '%')
                 ->whereNull('deleted_at')
-                ->paginate(10);
+                ->paginate(20);
         } else {
             $advertise = Advertise::select('id', 'article_id', 'target', 'latitude', 'longitude', 'redis', 'budget', 'start_date', 'end_date', 'status')
                 ->with(['article' => function ($q) {
                     $q->select('id', 'title', 'media', 'created_at');
                 }])
-                ->whereNull('deleted_at')->paginate(10);
+                ->whereNull('deleted_at')->paginate(20);
         }
         return $this->sendResponse($advertise, 'Advertise List Get Successfully.');
     }

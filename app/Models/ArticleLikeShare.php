@@ -15,6 +15,7 @@ class ArticleLikeShare extends Model
         'like',
         'share',
         'bookmark',
+        'report',
     ];
 
     protected $hidden=[
