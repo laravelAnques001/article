@@ -1,0 +1,113 @@
+@extends('Admin.layouts.common')
+@section('content')
+    <div>
+        <!-- Page header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <div class="page-title">
+                    <h4>
+                        <a href="{{ route('wallet.index') }}"><i class="icon-arrow-left52 position-left"></i></a>
+                        <span class="text-semibold">Wallet Create</span>
+                    </h4>
+                </div>
+
+            </div>
+            <div class="breadcrumb-line breadcrumb-line-component">
+                <ul class="breadcrumb">
+                    <li><a href="{{ route('dashboard') }}"><i class="icon-home2 position-left"></i> Home</a></li>
+                    <li>Wallet Create</li>
+                </ul>
+            </div>
+        </div>
+        <!-- /page header -->
+
+        <!-- Content area -->
+        <div class="content">
+
+            <!-- Horizontal form options -->
+            <div class="row">
+                <div class="col-md-12">
+
+                    <!-- Wallet Information-->
+                    <div class="form-horizontal">
+                        <div class="panel panel-flat">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">Wallet Information</h5>
+                            </div>
+                            {{--  <form wire:submit.prevent="save">  --}}
+                            <form action="{{ route('wallet.store') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="panel-body">
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="date">Date:</label>
+                                        <div class="col-lg-9">
+                                            <input type="datetime-local" class="form-control" name="date" id="date"
+                                                placeholder="Enter Wallet date" value="{{ old('date') }}">
+                                            @error('date')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="user_id">Select User:</label>
+                                        <div class="col-lg-9">
+                                            <select class="select" name="user_id" id="user_id">
+                                                <option value="">Select User</option>
+                                                @foreach ($users as $user)
+                                                    <option value="{{ $user->id }}"
+                                                        {{ old('user_id') == $user->id ? 'selected' : '' }}>
+                                                        {{ $user->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('user_id')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="transaction_id">Transaction Id:</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" class="form-control" name="transaction_id"
+                                                id="transaction_id" placeholder="Enter Wallet Transaction Id"
+                                                value="{{ old('transaction_id') }}">
+                                            @error('transaction_id')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="amount">Amount:</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" class="form-control" name="amount"
+                                                id="amount" placeholder="Enter Wallet Amount"
+                                                value="{{ old('amount') }}">
+                                            @error('amount')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="text-right">
+                                        <button type="submit" class="btn btn-primary">Submit form <i
+                                                class="icon-arrow-right14 position-right"></i></button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                    <!-- /Wallet Information -->
+
+                </div>
+            </div>
+            <!-- /vertical form options -->
+
+        </div>
+        <!-- /content area -->
+    </div>
+@endsection
