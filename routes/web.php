@@ -47,6 +47,8 @@ Route::get('term-condition', function () {
     return view('termCondition');
 });
 
+Route::get('article-view/{id}', [ArticleController::class,'articleView']);
+
 Route::group(['middleware' => 'auth'], function () {
 
     Route::get('dashboard', [DashBoardController::class, 'dashboard'])->name('dashboard');

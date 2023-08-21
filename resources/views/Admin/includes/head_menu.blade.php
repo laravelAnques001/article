@@ -2,7 +2,7 @@
 <div class="navbar navbar-default header-highlight">
     <div class="navbar-header navbar-header-color">
         <a class="navbar-brand navbar-brand-header" href="#">
-            <img src="{{ asset('assets/images/logo_light.png') }}" alt="">
+            <img src="{{ asset('assets/images/article.png') }}" alt="">
         </a>
 
         <ul class="nav navbar-nav visible-xs-block">

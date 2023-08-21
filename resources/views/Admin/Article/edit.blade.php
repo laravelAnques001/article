@@ -99,14 +99,37 @@
                                         <div class="col-lg-9">
                                             <select class="select" name="image_type" id="image_type">
                                                 <option value="">Select Article Type</option>
-                                                <option value="0" {{ $article->image_type == 0 ? 'selected' : '' }}>
+                                                <option value="0"
+                                                    {{ old('image_type', $article->image_type) == 0 ? 'selected' : '' }}>
                                                     Image
                                                 </option>
-                                                <option value="1" {{ $article->image_type == 1 ? 'selected' : '' }}>
+                                                <option value="1"
+                                                    {{ old('image_type', $article->image_type) == 1 ? 'selected' : '' }}>
                                                     Video
                                                 </option>
                                             </select>
                                             @error('image_type')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="status">Select Article Status:</label>
+                                        <div class="col-lg-9">
+                                            <select class="select" name="status" id="status">
+                                                <option value="">Select Article status</option>
+                                                <option value="In-Review"
+                                                    {{ old('status', $article->status) == 'In-Review' ? 'selected' : '' }}>
+                                                    In-Review</option>
+                                                <option value="Approved"
+                                                    {{ old('status', $article->status) == 'Approved' ? 'selected' : '' }}>
+                                                    Approved</option>
+                                                <option value="Rejected"
+                                                    {{ old('status', $article->status) == 'Rejected' ? 'selected' : '' }}>
+                                                    Rejected</option>
+                                            </select>
+                                            @error('status')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -122,8 +145,8 @@
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                             @if ($article->image_type == 0)
-                                                <img src="{{ $article->media_url }}" alt="Article Media"
-                                                    width="100" height="100">
+                                                <img src="{{ $article->media_url }}" alt="Article Media" width="100"
+                                                    height="100">
                                             @elseif ($article->image_type == 1)
                                                 <video width="150" height="150" controls>
                                                     <source src="{{ $article->media_url }}" type="">
@@ -133,7 +156,8 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="description">Article Description:</label>
+                                        <label class="col-lg-3 control-label" for="description">Article
+                                            Description:</label>
                                         <div class="col-lg-9">
                                             <textarea rows="2" cols="5" class="form-control" name="description" id="description"
                                                 placeholder="Enter Article Description">{{ old('description', $article->description) }}</textarea>

@@ -39,7 +39,8 @@
                                 @csrf
                                 <div class="panel-body">
                                     <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="category_id">Select Category Of Article:</label>
+                                        <label class="col-lg-3 control-label" for="category_id">Select Category Of
+                                            Article:</label>
                                         <div class="col-lg-9">
                                             <select class="select" name="category_id" id="category_id">
                                                 <option value="">Select Category</option>
@@ -92,10 +93,33 @@
                                         <div class="col-lg-9">
                                             <select class="select" name="image_type" id="image_type">
                                                 <option value="">Select Article Type</option>
-                                                <option value="0">Image</option>
-                                                <option value="1">Video</option>
+                                                <option value="0" {{ old('link') == 0 ? 'selected' : '' }}>Image
+                                                </option>
+                                                <option value="1" {{ old('link') == 1 ? 'selected' : '' }}>Video
+                                                </option>
                                             </select>
                                             @error('image_type')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="status">Select Article Status:</label>
+                                        <div class="col-lg-9">
+                                            <select class="select" name="status" id="status">
+                                                <option value="">Select Article status</option>
+                                                <option
+                                                    value="In-Review"{{ old('status') == 'In-Review' ? 'selected' : '' }}>
+                                                    In-Review</option>
+                                                <option
+                                                    value="Approved"{{ old('status') == 'Approved' ? 'selected' : '' }}>
+                                                    Approved</option>
+                                                <option
+                                                    value="Rejected"{{ old('status') == 'Rejected' ? 'selected' : '' }}>
+                                                    Rejected</option>
+                                            </select>
+                                            @error('status')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>

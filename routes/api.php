@@ -26,6 +26,12 @@ Route::post('otp-generate', [AuthController::class, 'otpGenerate']);
 Route::post('otp-verify', [AuthController::class, 'otpVerify']);
 // Route::post('forget-password', [AuthController::class, 'forgetPassword']);
 
+Route::get('article', [ArticleController::class, 'index']);
+Route::get('article/{article}', [ArticleController::class, 'show']);
+Route::get('impression-article/{article}', [ArticleController::class, 'impression']);
+// Route::get('trending-article', [ArticleController::class, 'trendingArticle']);
+Route::get('topics', [ArticleController::class, 'topics']);
+
 Route::middleware(['auth:api'])->Group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('profile-update', [AuthController::class, 'profileUpdate']);
@@ -36,17 +42,21 @@ Route::middleware(['auth:api'])->Group(function () {
     Route::post('user-category', [CategoryController::class, 'userCategory']);
 
     // article
-    // Route::get('article', [ArticleController::class, 'index']);
-    // Route::get('article/{article}', [ArticleController::class, 'show']);
-    // Route::post('article', [ArticleController::class, 'store']);
-    Route::apiResource('article', ArticleController::class);
+    // Route::get('my-article', [ArticleController::class, 'myArticle']);
+    // Route::get('bookmark-article', [ArticleController::class, 'bookmarkArticle']);
+    Route::get('user-article',[ArticleController::class,'userArticle']);
+
+    Route::post('article', [ArticleController::class, 'store']);
+    Route::post('edit-article/{article}', [ArticleController::class, 'update']);
+    Route::delete('article/{article}', [ArticleController::class, 'destroy']);
     Route::post('article-like-share', [ArticleController::class, 'likeShare']);
+    // Route::apiResource('article', ArticleController::class);
 
     // My Article
-    Route::get('my-article', [ArticleController::class, 'myArticle']);
+    // Route::get('my-article', [ArticleController::class, 'myArticle']);
 
     // Polls List
-    Route::get('polls', [PollsController::class, 'index']);
+    // Route::get('polls', [PollsController::class, 'index']);
 
     // advertise
     Route::get('advertise', [AdvertiseController::class, 'index']);
@@ -55,7 +65,7 @@ Route::middleware(['auth:api'])->Group(function () {
 
     // Route::get('setting/{key}', [AuthController::class, 'setting']);
 
-    Route::get('wallet', [WalletController::class,'index']);
-    Route::post('wallet', [WalletController::class,'store']);
+    Route::get('wallet', [WalletController::class, 'index']);
+    Route::post('wallet', [WalletController::class, 'store']);
 
 });

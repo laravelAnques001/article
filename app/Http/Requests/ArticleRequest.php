@@ -29,12 +29,13 @@ class ArticleRequest extends FormRequest
             'link' => 'nullable|string',
             'tags' => 'nullable|string|min:3',
             'description' => 'nullable|string|min:3',
-            'image_type' => 'nullable|in:0,1',
+            'image_type' => 'nullable|in:0,1,2',
             // 'media' => 'nullable|file',
-            'media' => 'nullable|file|mimes:jpeg,jpg,png,bmp,gif,svg,mp4,ogx,oga,ogv,ogg,webm,video/*',
+            // 'media' => 'nullable|file|mimes:jpeg,jpg,png,bmp,gif,svg,mp4,ogx,oga,ogv,ogg,webm,video/*',
+            'media' => 'nullable|string',
             'status' => 'nullable|in:In-Review,Approved,Rejected',
         ];
-        if ($this->isMethod('POST')) {
+        if ($this->is('article')) {
             $rules['category_id'] = ['required', Rule::exists('categories', 'id')->whereNull('deleted_at')];
         } else {
             $rules['category_id'] = ['nullable', Rule::exists('categories', 'id')->whereNull('deleted_at')];

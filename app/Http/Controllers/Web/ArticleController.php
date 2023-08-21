@@ -194,4 +194,9 @@ class ArticleController extends Controller
         }
         exit;
     }
+
+    public function articleView($id){
+        $article = Article::whereNull('deleted_at')->find(base64_decode($id))??abort(404);
+        return view('article',compact('article'));
+    }
 }

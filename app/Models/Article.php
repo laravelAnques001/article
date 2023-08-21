@@ -21,34 +21,36 @@ class Article extends Model
         'image_type',
         'media',
         'thumbnail',
+        'impression',
         'deleted_at',
         'status',
     ];
 
     protected $appends = [
-        'media_url',
-        'thumbnail_url',
+        // 'media_url',
+        // 'thumbnail_url',
         'like_count',
         'share_count',
-        'impressions_count',
+        // 'impressions_count',
         'bookmark',
         'like',
         'day_ago',
+        'web_link',
     ];
 
     protected $casts = [
         'created_at' => 'date:Y-m-d H:i:s',
     ];
 
-    public function getMediaUrlAttribute()
-    {
-        return $this->media ? asset(Storage::url($this->media)) : '';
-    }
+    // public function getMediaUrlAttribute()
+    // {
+    //     return $this->media ? asset(Storage::url($this->media)) : '';
+    // }
 
-    public function getThumbnailUrlAttribute()
-    {
-        return $this->thumbnail ? asset(Storage::url($this->thumbnail)) : '';
-    }
+    // public function getThumbnailUrlAttribute()
+    // {
+    //     return $this->thumbnail ? asset(Storage::url($this->thumbnail)) : '';
+    // }
 
     public function getDayAgoAttribute()
     {
@@ -80,10 +82,10 @@ class Article extends Model
         return $this->hasMany(ArticleLikeShare::class, 'article_id')->where('share', 1)->count() ?? 0;
     }
 
-    public function getImpressionsCountAttribute()
-    {
-        return $this->hasMany(ArticleLikeShare::class, 'article_id')->sum('impressions') ?? 0;
-    }
+    // public function getImpressionsCountAttribute()
+    // {
+    //     return $this->hasMany(ArticleLikeShare::class, 'article_id')->sum('impressions') ?? 0;
+    // }
 
     public function getBookmarkAttribute()
     {
@@ -101,5 +103,10 @@ class Article extends Model
         static::creating(function ($model) {
             $model->user_id = isset(auth()->user()->id) ? auth()->user()->id : 0;
         });
+    }
+
+    public function getWebLinkAttribute()
+    {
+        return url('article-view/' . base64_encode($this->id));
     }
 }
