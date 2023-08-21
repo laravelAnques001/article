@@ -5,7 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdvertiseRequest;
 use App\Models\Advertise;
+use App\Models\Article;
+use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class AdvertiseController extends Controller
 {
@@ -75,5 +80,101 @@ class AdvertiseController extends Controller
         } else {
             return $this->sendError([], 'Record Not Found.');
         }
+    }
+
+    public function getAdvertise(Request $request)
+    {
+        $latitude = isset($request->latitude) ? $request->latitude : null;
+        $longitude = isset($request->longitude) ? $request->longitude : null;
+        $advertise = $this->AdvertiseSingleRecordGet($latitude, $longitude);
+        $article = [];
+        if ($advertise) {
+            $article = Article::find($advertise->article_id);
+            if ($advertise->target == 1) {
+                $today_charges = Transaction::where('article_id', $advertise->article_id)->whereBetween('created_at', [$advertise->start_date, $advertise->end_date])->sum('charge');
+                if ($today_charges >= $advertise->budget) {
+                    $advertise = $this->AdvertiseSingleRecordGet($latitude, $longitude);
+                }
+            }
+        }
+
+        return $this->sendResponse($article, 'Advertise Record Get Successfully.');
+    }
+
+    public function AdvertiseSingleRecordGet($lat = null, $log = null)
+    {
+        $advertise = null;
+        if ($lat && $log) {
+            $advertise = DB::table('advertises')
+                ->select('id', 'article_id', 'target', 'budget', 'start_date', 'end_date', DB::raw("6371 * acos(cos(radians(" . $lat . "))
+                * cos(radians(advertises.latitude))
+                * cos(radians(advertises.longitude) - radians(" . $log . "))
+                + sin(radians(" . $lat . "))
+                * sin(radians(advertises.latitude))) AS distance"))
+                ->havingRaw('distance < 25')
+            // ->where('status', '==', 'Public')
+                ->inRandomOrder()->first();
+        }
+        if (!$advertise) {
+            $advertise = Advertise::where('target', 0)
+            // ->where('status', 'Public')
+                ->inRandomOrder()
+                ->first();
+        }
+        return $advertise;
+    }
+
+    public function impressionClick(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'article_id' => 'required|exists:articles,id',
+            'impression' => 'nullable|in:0,1',
+            'click' => 'nullable|in:0,1',
+            'device_detail' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());
+        }
+
+        $article = isset($request->article_id) ? $request->article_id : 0;
+        $impression = isset($request->impression) ? $request->impression : 0;
+        $click = isset($request->click) ? $request->click : 0;
+        $device_detail = isset($request->device_detail) ? $request->device_detail : null;
+
+        //impression add
+        $impressionArticle = Article::whereNull('deleted_at')->find($article);
+        $impressionArticle->impression += 1;
+        $impressionArticle->save();
+
+        $charge = 0;
+        $impression_charge = 0.25;
+        $click_charge = 0.50;
+
+        if ($impression) {
+            $charge = $impression_charge;
+        }
+        if ($click) {
+            $charge = $click_charge;
+        }
+        if ($click && $impression) {
+            $charge = $impression_charge + $click_charge;
+        }
+
+        //transaction
+        Transaction::create([
+            'article_id' => $article,
+            'impression' => $impression,
+            'click' => $click,
+            'device_detail' => $device_detail,
+            'charge' => $charge,
+        ]);
+
+        // article author balance
+        $user = User::find($impressionArticle->user_id);
+        $user->balance -= $charge;
+        $user->save();
+
+        return $this->sendResponse([], 'Article Impression Added.');
     }
 }

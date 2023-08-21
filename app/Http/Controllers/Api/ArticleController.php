@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticleRequest;
 use App\Models\Article;
 use App\Models\ArticleLikeShare;
+use App\Models\ArticleNotification;
 use App\Models\CategoryUser;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -192,6 +193,10 @@ class ArticleController extends Controller
             ->withBody($request->description)
             ->sendMessage($fcmTokens);
 
+        ArticleNotification::create([
+            'article_id' => $article->id,
+        ]);
+
         return $this->sendResponse($article->id, 'Article Created Successfully.');
     }
 
@@ -331,11 +336,16 @@ class ArticleController extends Controller
         return $this->sendResponse([], 'Like-Share Article Successfully.');
     }
 
-    public function impression($id)
+    public function articleNotification()
     {
-        $article = Article::whereNull('deleted_at')->find(base64_decode($id));
-        $article->impression += 1;
-        $article->save();
-        return $this->sendResponse([], 'Article Impression Added.');
+        $notification = ArticleNotification::with(['article' => function ($q) {
+            $q->select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression');
+        }])->with(['article.user' => function ($q) {
+            $q->select('name', 'email', 'id', 'image');
+        }])->with(['article.category' => function ($q) {
+            $q->select('id', 'name', 'image');
+        }])->orderByDesc('id')->paginate(20);
+
+        return $this->sendResponse($notification, 'Article List Get Successfully.');
     }
 }

@@ -155,6 +155,7 @@ class AuthController extends Controller
         $dial_code = isset($request->dial_code) ? $request->dial_code : 91;
         $mobile_number = isset($request->mobile_number) ? $request->mobile_number : null;
         $email = isset($request->email) ? $request->email : null;
+        $device_token = isset($request->device_token) ? $request->device_token : null;
 
         if ($email) {
             $user = User::where('email', $email)->where('otp', $request->otp)->where('expire_at', '>=', now())->first();
@@ -172,7 +173,7 @@ class AuthController extends Controller
             $user->fill([
                 'otp' => null,
                 'expire_at' => null,
-                'device_token' => $request->device_token,
+                'device_token' => $device_token,
             ])->save();
 
             Auth::login($user);

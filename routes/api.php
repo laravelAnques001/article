@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\AdvertiseController;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\Api\PollsController;
 use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\TextUI\XmlConfiguration\Group;
@@ -28,9 +27,11 @@ Route::post('otp-verify', [AuthController::class, 'otpVerify']);
 
 Route::get('article', [ArticleController::class, 'index']);
 Route::get('article/{article}', [ArticleController::class, 'show']);
-Route::get('impression-article/{article}', [ArticleController::class, 'impression']);
+Route::post('impression-click-article', [AdvertiseController::class, 'impressionClick']);
 // Route::get('trending-article', [ArticleController::class, 'trendingArticle']);
 Route::get('topics', [ArticleController::class, 'topics']);
+Route::get('article-notification', [ArticleController::class, 'articleNotification']);
+Route::post('advertise-get', [AdvertiseController::class, 'getAdvertise']);
 
 Route::middleware(['auth:api'])->Group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
@@ -44,7 +45,7 @@ Route::middleware(['auth:api'])->Group(function () {
     // article
     // Route::get('my-article', [ArticleController::class, 'myArticle']);
     // Route::get('bookmark-article', [ArticleController::class, 'bookmarkArticle']);
-    Route::get('user-article',[ArticleController::class,'userArticle']);
+    Route::get('user-article', [ArticleController::class, 'userArticle']);
 
     Route::post('article', [ArticleController::class, 'store']);
     Route::post('edit-article/{article}', [ArticleController::class, 'update']);
