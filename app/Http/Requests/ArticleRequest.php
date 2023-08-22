@@ -33,6 +33,7 @@ class ArticleRequest extends FormRequest
             // 'media' => 'nullable|file',
             // 'media' => 'nullable|file|mimes:jpeg,jpg,png,bmp,gif,svg,mp4,ogx,oga,ogv,ogg,webm,video/*',
             'media' => 'nullable|string',
+            'thumbnail' => 'nullable|string',
             'status' => 'nullable|in:In-Review,Approved,Rejected',
         ];
         if ($this->is('article')) {

@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticleRequest;
+use App\Mail\ArticleApprovedUserMail;
 use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\Facades\DataTables;
 
 class ArticleController extends Controller
@@ -46,7 +48,7 @@ class ArticleController extends Controller
         }
         $article = Article::create($validated);
         $data = [
-            'to' => '/topics/junior',
+            'to' => '/topics/broadcast-all',
             "notification" => [
                 "title" => $request->title,
                 "body" => $request->description,
@@ -108,7 +110,7 @@ class ArticleController extends Controller
      */
     public function update(ArticleRequest $request, $id)
     {
-        $article = Article::find(base64_decode($id)) ?? abort(404);
+        $article = Article::with('user')->find(base64_decode($id)) ?? abort(404);
         $validated = $request->validated();
         if ($image = $validated['media'] ?? null) {
             if ($oldImage = $article->media ?? null) {
@@ -120,6 +122,15 @@ class ArticleController extends Controller
             $validated['media'] = $image->store('public/article');
         }
         $article->fill($validated)->save();
+
+        $status = isset($request->status) ? $request->status : null;
+        $email = isset($article->user->email) ? $article->user->email : null;
+
+        if ($status == 'Approved') {
+            if ($email) {
+                Mail::to($email)->send(new ArticleApprovedUserMail($article));
+            }
+        }
         return redirect()->route('article.index')->with('success', 'Article Updated SuccessFully.');
     }
 
@@ -195,8 +206,9 @@ class ArticleController extends Controller
         exit;
     }
 
-    public function articleView($id){
-        $article = Article::whereNull('deleted_at')->find(base64_decode($id))??abort(404);
-        return view('article',compact('article'));
+    public function articleView($id)
+    {
+        $article = Article::whereNull('deleted_at')->find(base64_decode($id)) ?? abort(404);
+        return view('article', compact('article'));
     }
 }

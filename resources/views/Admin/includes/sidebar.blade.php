@@ -19,10 +19,10 @@
                             href="{{ route('advertise.index') }}"><i class="icon-users"></i>
                             <span>Advertise</span></a>
                     </li>
-                    <li class="{{ Route::currentRouteName() == 'wallet.*' ? 'active' : '' }}"><a
+                    {{--  <li class="{{ Route::currentRouteName() == 'wallet.*' ? 'active' : '' }}"><a
                         href="{{ route('polls.index') }}"><i class="icon-people"></i></i></i>
                         <span>Polls</span></a>
-                    </li>
+                    </li>  --}}
                     <li class="{{ Route::currentRouteName() == 'wallet.*' ? 'active' : '' }}"><a
                             href="{{ route('wallet.index') }}"><i class="icon-book"></i>
                             <span>Wallet</span></a>

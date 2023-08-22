@@ -4,15 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticleRequest;
+use App\Mail\ArticleCreateAdminMail;
 use App\Models\Article;
 use App\Models\ArticleLikeShare;
 use App\Models\ArticleNotification;
 use App\Models\CategoryUser;
 use App\Models\User;
+use App\Notifications\SendPushNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Kutia\Larafirebase\Facades\Larafirebase;
 
 class ArticleController extends Controller
 {
@@ -27,17 +30,11 @@ class ArticleController extends Controller
         $insights = isset($request->insights) ? $request->insights : null;
         $trending = isset($request->trending) ? $request->trending : null;
 
-        $articles = $this->commonArticle();
+        $articles = $this->commonArticle()->where('status', 'Approved');
 
         if ($search) {
             $articlesData = $articles->where('title', 'like', '%' . $search . '%')
-                ->orWhere('link', 'like', '%' . $search . '%')
                 ->orWhere('tags', 'like', '%' . $search . '%')
-                ->orWhere('image_type', 'like', '%' . $search . '%')
-                ->orWhere('description', 'like', '%' . $search . '%')
-                ->orWhereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%');
-                })
                 ->orWhereHas('category', function ($q) use ($search) {
                     $q->where('name', 'like', '%' . $search . '%');
                 })
@@ -61,21 +58,32 @@ class ArticleController extends Controller
         $relevanceStories = isset($request->relevanceStories) ? $request->relevanceStories : null;
         $myArticle = isset($request->myArticle) ? $request->myArticle : null;
         $bookmarked = isset($request->bookmarked) ? $request->bookmarked : null;
+        $search = isset($request->search) ? $request->search : null;
 
-        $articles = $this->commonArticle()->when($userCategory, function ($q) use ($userCategory) {
-            $q->whereIn('category_id', $userCategory);
-        });
+        // $articles = $this->commonArticle()->when($userCategory, function ($q) use ($userCategory) {
+        //     $q->whereIn('category_id', $userCategory);
+        // });
+        $articles = $this->commonArticle();
 
-        if ($myArticle) {
+        if ($search) {
+            $articlesData = $articles->where('title', 'like', '%' . $search . '%')
+                ->orWhere('tags', 'like', '%' . $search . '%')
+                ->orWhereHas('category', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                })->where('status', 'Approved')
+                ->orderByDesc('id')
+                ->paginate(10);
+
+        } elseif ($myArticle) {
             $articlesData = $articles->where('user_id', $userId)->orderByDesc('id')->paginate(10);
         } elseif ($bookmarked) {
             $articlesData = $articles->whereHas('articleLikeShare', function ($q) use ($userId) {
                 $q->where('bookmark', 1)->where('user_id', $userId);
-            })->orderByDesc('id')->paginate(10);
+            })->where('status', 'Approved')->orderByDesc('id')->paginate(10);
         } elseif ($relevanceStories) {
-            $articlesData = $articles->orderByDesc('id')->paginate(10);
+            $articlesData = $articles->where('status', 'Approved')->orderByDesc('id')->paginate(10);
         } else {
-            $articlesData = $articles->orderByDesc('id')->paginate(10);
+            $articlesData = $articles->where('status', 'Approved')->orderByDesc('id')->paginate(10);
         }
         return $this->sendResponse($articlesData, 'Article List Get Successfully.');
     }
@@ -162,40 +170,39 @@ class ArticleController extends Controller
         //     }
         // }
         $article = Article::create($validated);
-        // $data = [
-        //     'to' => '/topics/broadcast-all',
-        //     "notification" => [
-        //         "title" => $request->title,
-        //         "body" => $article,
-        //     ],
-        // ];
+        $fcmTokens = User::whereNotNull('device_token')->pluck('device_token')->toArray();
+        $data = [
+            'to' => '/topics/broadcast-all',
+            "notification" => [
+                "title" => $request->title,
+                "body" => $article,
+            ],
+        ];
 
-        // $encodedData = json_encode($data);
-        // $apiKey = env('FIREBASE_API_KEY');
-        // $headers = array(
-        //     'Authorization: key=' . $apiKey,
-        //     'Content-Type: application/json',
-        // );
+        $encodedData = json_encode($data);
+        $apiKey = env('FIREBASE_API_KEY');
+        $headers = array(
+            'Authorization: key=' . $apiKey,
+            'Content-Type: application/json',
+        );
 
-        // $ch = curl_init();
-        // curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-        // curl_setopt($ch, CURLOPT_POST, true);
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        // curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
-        // $result = curl_exec($ch);
-        // curl_close($ch);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
+        $result = curl_exec($ch);
+        curl_close($ch);
 
-        // $fcmTokens = User::whereNotNull('device_token')->pluck('device_token')->toArray();
-        // Larafirebase::withTitle($request->title)
-        //     ->withBody($request->description)
-        //     ->sendMessage($fcmTokens);
+        ArticleNotification::create([
+            'article_id' => $article->id,
+        ]);
 
-        // ArticleNotification::create([
-        //     'article_id' => $article->id,
-        // ]);
+        Notification::send(null, new SendPushNotification($request->title, $article, $fcmTokens));
+        Mail::to(config('mail.from.address'))->send(new ArticleCreateAdminMail($article));
 
         return $this->sendResponse($article->id, 'Article Created Successfully.');
     }

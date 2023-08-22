@@ -74,17 +74,20 @@
                         "data": "image"
                     },
                     {
-                        "data": "date"
-                    },
-                    {
                         "data": "like_count"
                     },
                     {
-                        "data": "share_count"
+                        "data": "share"
                     },
                     {
-                        "data": "active"
+                        "data": "status"
                     },
+                    {
+                        "data": "date"
+                    },
+                    {{--  {
+                        "data": "active"
+                    },  --}}
                 ]
             });
 
@@ -262,10 +265,11 @@
                                     <th>Link</th>
                                     <th>Category Name</th>
                                     <th>Media</th>
-                                    <th>Created At</th>
                                     <th>Total Likes</th>
                                     <th>Total Shares</th>
-                                    <th>Active</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                    {{--  <th>Active</th>  --}}
                                 </tr>
                             </thead>
                         </table>
