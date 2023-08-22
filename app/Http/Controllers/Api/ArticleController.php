@@ -58,6 +58,8 @@ class ArticleController extends Controller
         $relevanceStories = isset($request->relevanceStories) ? $request->relevanceStories : null;
         $myArticle = isset($request->myArticle) ? $request->myArticle : null;
         $bookmarked = isset($request->bookmarked) ? $request->bookmarked : null;
+        $insights = isset($request->insights) ? $request->insights : null;
+        $trending = isset($request->trending) ? $request->trending : null;
         $search = isset($request->search) ? $request->search : null;
 
         // $articles = $this->commonArticle()->when($userCategory, function ($q) use ($userCategory) {
@@ -80,6 +82,10 @@ class ArticleController extends Controller
             $articlesData = $articles->whereHas('articleLikeShare', function ($q) use ($userId) {
                 $q->where('bookmark', 1)->where('user_id', $userId);
             })->where('status', 'Approved')->orderByDesc('id')->paginate(10);
+        } elseif ($trending) {
+            $articlesData = $articles->orderByDesc('impression')->paginate(10);
+        } elseif ($insights) {
+            $articlesData = $articles->orderByDesc('id')->paginate(10);
         } elseif ($relevanceStories) {
             $articlesData = $articles->where('status', 'Approved')->orderByDesc('id')->paginate(10);
         } else {
@@ -181,8 +187,9 @@ class ArticleController extends Controller
 
         $encodedData = json_encode($data);
         $apiKey = env('FIREBASE_API_KEY');
+        $serverKey = env('FIREBASE_SERVER_KEY');
         $headers = array(
-            'Authorization: key=' . $apiKey,
+            'Authorization: key=' . $serverKey,
             'Content-Type: application/json',
         );
 

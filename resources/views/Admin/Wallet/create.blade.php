@@ -83,10 +83,21 @@
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="amount">Amount:</label>
                                         <div class="col-lg-9">
-                                            <input type="text" class="form-control" name="amount"
-                                                id="amount" placeholder="Enter Wallet Amount"
-                                                value="{{ old('amount') }}">
+                                            <input type="text" class="form-control" name="amount" id="amount"
+                                                placeholder="Enter Wallet Amount" value="{{ old('amount') }}">
                                             @error('amount')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="payment_response">Payment
+                                            Response:</label>
+                                        <div class="col-lg-9">
+                                            <textarea rows="2" cols="5" class="form-control" name="payment_response" id="payment_response"
+                                                value="{{ old('payment_response') }}" placeholder="Enter Wallet Payment Response"></textarea>
+                                            @error('payment_response')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>

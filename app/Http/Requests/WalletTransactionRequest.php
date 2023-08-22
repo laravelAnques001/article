@@ -25,7 +25,7 @@ class WalletTransactionRequest extends FormRequest
     {
         return [
             'transaction_id' => 'required|string',
-            'payment_response' => 'required|string'
+            'payment_response' => 'required|string',
         ];
     }
 }

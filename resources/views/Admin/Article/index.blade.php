@@ -70,9 +70,9 @@
                     {
                         "data": "category_name"
                     },
-                    {
+                    {{--  {
                         "data": "image"
-                    },
+                    },  --}}
                     {
                         "data": "like_count"
                     },
@@ -264,7 +264,7 @@
                                     <th>Title</th>
                                     <th>Link</th>
                                     <th>Category Name</th>
-                                    <th>Media</th>
+                                    {{--  <th>Media</th>  --}}
                                     <th>Total Likes</th>
                                     <th>Total Shares</th>
                                     <th>Status</th>

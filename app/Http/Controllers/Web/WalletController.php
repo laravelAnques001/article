@@ -43,7 +43,7 @@ class WalletController extends Controller
         $validated = $request->validated();
         Wallet::create($validated);
         $user = User::find($validated['user_id']);
-        $user->increment('balance',$validated['amount']);
+        $user->increment('balance', $validated['amount']);
         return redirect()->route('wallet.index')->with('success', 'Wallet Created SuccessFully.');
     }
 
@@ -118,7 +118,7 @@ class WalletController extends Controller
             ->editColumn('user_id', function ($data) {
                 return $data->user->name;
             })
-            ->rawColumns(['action','user_id'])
+            ->rawColumns(['action', 'user_id'])
             ->addIndexColumn()
             ->toJson();
     }

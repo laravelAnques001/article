@@ -24,10 +24,11 @@ class WalletRequest extends FormRequest
     public function rules()
     {
         return [
-            'date' => 'required|date_format:Y-m-d\TH:i',
+            'date' => 'nullable|date_format:Y-m-d\TH:i',
             'user_id' => 'required|exists:users,id',
-            'transaction_id' => 'required|string',
-            'amount' => 'required|numeric'
+            'transaction_id' => 'nullable|string',
+            'amount' => 'nullable|numeric',
+            'payment_response' => 'nullable|string',
         ];
     }
 }
