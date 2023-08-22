@@ -42,14 +42,14 @@ class ArticleController extends Controller
                     $q->where('name', 'like', '%' . $search . '%');
                 })
                 ->orderByDesc('id')
-                ->paginate(20);
+                ->paginate(10);
 
         } elseif ($trending) {
-            $articlesData = $articles->orderByDesc('impression')->paginate(20);
+            $articlesData = $articles->orderByDesc('impression')->paginate(10);
         } elseif ($insights) {
-            $articlesData = $articles->orderByDesc('id')->paginate(20);
+            $articlesData = $articles->orderByDesc('id')->paginate(10);
         } else {
-            $articlesData = $articles->orderByDesc('id')->paginate(20);
+            $articlesData = $articles->orderByDesc('id')->paginate(10);
         }
         return $this->sendResponse($articlesData, 'Article List Get Successfully.');
     }
@@ -67,15 +67,15 @@ class ArticleController extends Controller
         });
 
         if ($myArticle) {
-            $articlesData = $articles->where('user_id', $userId)->orderByDesc('id')->paginate(20);
+            $articlesData = $articles->where('user_id', $userId)->orderByDesc('id')->paginate(10);
         } elseif ($bookmarked) {
             $articlesData = $articles->whereHas('articleLikeShare', function ($q) use ($userId) {
                 $q->where('bookmark', 1)->where('user_id', $userId);
-            })->orderByDesc('id')->paginate(20);
+            })->orderByDesc('id')->paginate(10);
         } elseif ($relevanceStories) {
-            $articlesData = $articles->orderByDesc('id')->paginate(20);
+            $articlesData = $articles->orderByDesc('id')->paginate(10);
         } else {
-            $articlesData = $articles->orderByDesc('id')->paginate(20);
+            $articlesData = $articles->orderByDesc('id')->paginate(10);
         }
         return $this->sendResponse($articlesData, 'Article List Get Successfully.');
     }
@@ -84,7 +84,7 @@ class ArticleController extends Controller
     {
         $userId = auth()->id();
         $userCategory = CategoryUser::where('user_id', $userId)->pluck('category_id')->toArray();
-        return Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression')
+        return Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression', 'share')
             ->with(['user' => function ($q) {
                 $q->select('name', 'email', 'id', 'image');
             }])
@@ -98,9 +98,9 @@ class ArticleController extends Controller
     {
         $category_id = isset($request->category_id) ? $request->category_id : null;
         if ($category_id) {
-            $articles = $this->commonArticle()->where('category_id', $category_id)->orderByDesc('id')->paginate(20);
+            $articles = $this->commonArticle()->where('category_id', $category_id)->orderByDesc('id')->paginate(10);
         } else {
-            $articles = $this->commonArticle()->orderByDesc('id')->paginate(20);
+            $articles = $this->commonArticle()->orderByDesc('id')->paginate(10);
         }
         return $this->sendResponse($articles, 'Article List Get Successfully.');
     }
@@ -163,10 +163,10 @@ class ArticleController extends Controller
         // }
         $article = Article::create($validated);
         // $data = [
-        //     'to' => '/topics/junior',
+        //     'to' => '/topics/broadcast-all',
         //     "notification" => [
         //         "title" => $request->title,
-        //         "body" => $request->description,
+        //         "body" => $article,
         //     ],
         // ];
 
@@ -188,14 +188,14 @@ class ArticleController extends Controller
         // $result = curl_exec($ch);
         // curl_close($ch);
 
-        $fcmTokens = User::whereNotNull('device_token')->pluck('device_token')->toArray();
-        Larafirebase::withTitle($request->title)
-            ->withBody($request->description)
-            ->sendMessage($fcmTokens);
+        // $fcmTokens = User::whereNotNull('device_token')->pluck('device_token')->toArray();
+        // Larafirebase::withTitle($request->title)
+        //     ->withBody($request->description)
+        //     ->sendMessage($fcmTokens);
 
-        ArticleNotification::create([
-            'article_id' => $article->id,
-        ]);
+        // ArticleNotification::create([
+        //     'article_id' => $article->id,
+        // ]);
 
         return $this->sendResponse($article->id, 'Article Created Successfully.');
     }
@@ -208,7 +208,7 @@ class ArticleController extends Controller
      */
     public function show($id)
     {
-        $article = Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'status', 'impression')
+        $article = Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'status', 'impression', 'share', 'thumbnail')
             ->with(['user' => function ($q) {
                 $q->select('name', 'email', 'id', 'image');
             }])
@@ -287,8 +287,27 @@ class ArticleController extends Controller
     {
         $validated = Validator::make($request->all(), [
             'article_id' => 'required|exists:articles,id',
-            'like' => 'nullable|in:1,0',
             'share' => 'nullable|in:1,0',
+        ]);
+
+        if ($validated->fails()) {
+            return $this->sendError($validated->errors(), 'Validation Error.');
+        }
+
+        //article start
+        $article = Article::find($request->article_id);
+        $article->share += 1;
+        $article->save();
+        //article end
+
+        return $this->sendResponse([], 'Like-Share Article Successfully.');
+    }
+
+    public function likeShareUser(Request $request)
+    {
+        $validated = Validator::make($request->all(), [
+            'article_id' => 'required|exists:articles,id',
+            'like' => 'nullable|in:1,0',
             'impressions' => 'nullable|in:1,0',
             'bookmark' => 'nullable|in:1,0',
         ]);
@@ -301,7 +320,7 @@ class ArticleController extends Controller
 
         // $impressions = isset($request->impressions) ? $request->impressions : 0;
         $like = isset($request->like) ? $request->like : 0;
-        $share = isset($request->share) ? $request->share : 0;
+        // $share = isset($request->share) ? $request->share : 0;
         $bookmark = isset($request->bookmark) ? $request->bookmark : 0;
         $report = isset($request->report) ? $request->report : null;
         if (is_null($articleLSI)) {
@@ -310,7 +329,7 @@ class ArticleController extends Controller
                 'user_id' => auth()->id(),
                 // 'impressions' => $impressions,
                 'like' => $like,
-                'share' => $share,
+                // 'share' => $share,
                 'bookmark' => $bookmark,
                 'report' => $report,
             ]);
@@ -321,9 +340,9 @@ class ArticleController extends Controller
             if ($like) {
                 $articleLSI['like'] = $like;
             }
-            if ($share) {
-                $articleLSI['share'] = $share;
-            }
+            // if ($share) {
+            //     $articleLSI['share'] = $share;
+            // }
             if ($bookmark) {
                 $articleLSI['bookmark'] = $bookmark;
             }
@@ -344,7 +363,7 @@ class ArticleController extends Controller
             $q->select('name', 'email', 'id', 'image');
         }])->with(['article.category' => function ($q) {
             $q->select('id', 'name', 'image');
-        }])->orderByDesc('id')->paginate(20);
+        }])->orderByDesc('id')->paginate(10);
 
         return $this->sendResponse($notification, 'Article List Get Successfully.');
     }

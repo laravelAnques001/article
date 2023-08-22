@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage;
 use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
@@ -55,7 +54,7 @@ class User extends Authenticatable
 
     public function getImageUrlAttribute()
     {
-        return $this->image ? asset(Storage::url($this->image)) : asset('assets/images/McrkmG7D6RoKVN7k42ojo4mMeN6WM7uZ5RmhUoeM.jpg');
+        return $this->image ? $this->image : asset('assets/images/McrkmG7D6RoKVN7k42ojo4mMeN6WM7uZ5RmhUoeM.jpg');
     }
 
     public function article()

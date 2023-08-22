@@ -5,7 +5,6 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class Article extends Model
 {
@@ -22,6 +21,7 @@ class Article extends Model
         'media',
         'thumbnail',
         'impression',
+        'share',
         'deleted_at',
         'status',
     ];
@@ -30,7 +30,7 @@ class Article extends Model
         // 'media_url',
         // 'thumbnail_url',
         'like_count',
-        'share_count',
+        // 'share_count',
         // 'impressions_count',
         'bookmark',
         'like',

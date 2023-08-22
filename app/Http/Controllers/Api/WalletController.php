@@ -18,7 +18,7 @@ class WalletController extends Controller
      */
     public function index()
     {
-        $wallet = Wallet::select('id','user_id','transaction_id','amount','created_at')->where('user_id', auth()->id())->whereNull('deleted_at')->orderByDesc('id')->paginate(20);
+        $wallet = Wallet::select('id','user_id','transaction_id','amount','created_at')->where('user_id', auth()->id())->whereNull('deleted_at')->orderByDesc('id')->paginate(10);
         $user = User::find(auth()->id());
         $success = [
             'wallet' => $wallet,

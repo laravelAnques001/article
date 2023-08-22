@@ -226,7 +226,8 @@ class AuthController extends Controller
             'name' => 'nullable|string|min:3',
             'email' => 'nullable|email|unique:users,email,' . $userId,
             'mobile_number' => 'nullable|digits_between:10,12|unique:users,mobile_number,' . $userId,
-            'image' => 'nullable|image',
+            // 'image' => 'nullable|image',
+            'image' => 'nullable|string',
             'category_id' => 'nullable',
         ]);
 
@@ -236,15 +237,15 @@ class AuthController extends Controller
         $validated = $request->all();
         $user = User::find($userId);
 
-        if ($image = $request->image ?? null) {
-            if ($oldImage = $user->image ?? null) {
-                $fileCheck = storage_path('app/' . $oldImage);
-                if (file_exists($fileCheck)) {
-                    unlink($fileCheck);
-                }
-            }
-            $validated['image'] = $image->store('public/user');
-        }
+        // if ($image = $request->image ?? null) {
+        //     if ($oldImage = $user->image ?? null) {
+        //         $fileCheck = storage_path('app/' . $oldImage);
+        //         if (file_exists($fileCheck)) {
+        //             unlink($fileCheck);
+        //         }
+        //     }
+        //     $validated['image'] = $image->store('public/user');
+        // }
         if ($categoryIds = $request->category_id) {
             $categories = explode(',', $categoryIds);
             $user->category()->sync($categories);

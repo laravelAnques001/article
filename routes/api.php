@@ -32,6 +32,7 @@ Route::post('impression-click-article', [AdvertiseController::class, 'impression
 Route::get('topics', [ArticleController::class, 'topics']);
 Route::get('article-notification', [ArticleController::class, 'articleNotification']);
 Route::post('advertise-get', [AdvertiseController::class, 'getAdvertise']);
+Route::post('article-like-share', [ArticleController::class, 'likeShare']);
 
 Route::middleware(['auth:api'])->Group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
@@ -50,7 +51,7 @@ Route::middleware(['auth:api'])->Group(function () {
     Route::post('article', [ArticleController::class, 'store']);
     Route::post('edit-article/{article}', [ArticleController::class, 'update']);
     Route::delete('article/{article}', [ArticleController::class, 'destroy']);
-    Route::post('article-like-share', [ArticleController::class, 'likeShare']);
+    Route::post('user/article-like-share', [ArticleController::class, 'likeShareUser']);
     // Route::apiResource('article', ArticleController::class);
 
     // My Article
@@ -62,6 +63,8 @@ Route::middleware(['auth:api'])->Group(function () {
     // advertise
     Route::get('advertise', [AdvertiseController::class, 'index']);
     Route::post('advertise', [AdvertiseController::class, 'store']);
+    Route::post('edit-advertise/{advertise}', [AdvertiseController::class, 'update']);
+    Route::delete('advertise/{advertise}', [AdvertiseController::class, 'destroy']);
     // Route::get('advertise/{advertise}', [AdvertiseController::class, 'show']);
 
     // Route::get('setting/{key}', [AuthController::class, 'setting']);

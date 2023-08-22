@@ -8,6 +8,7 @@ use App\Models\Advertise;
 use App\Models\Article;
 use App\Models\Transaction;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -37,13 +38,13 @@ class AdvertiseController extends Controller
                 ->orWhere('start_date', 'like', '%' . $search . '%')
                 ->orWhere('end_date', 'like', '%' . $search . '%')
                 ->whereNull('deleted_at')
-                ->paginate(20);
+                ->paginate(10);
         } else {
             $advertise = Advertise::select('id', 'article_id', 'target', 'latitude', 'longitude', 'redis', 'budget', 'start_date', 'end_date', 'status')
                 ->with(['article' => function ($q) {
                     $q->select('id', 'title', 'media', 'created_at');
                 }])
-                ->whereNull('deleted_at')->paginate(20);
+                ->whereNull('deleted_at')->paginate(10);
         }
         return $this->sendResponse($advertise, 'Advertise List Get Successfully.');
     }
@@ -81,6 +82,33 @@ class AdvertiseController extends Controller
             return $this->sendError([], 'Record Not Found.');
         }
     }
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(AdvertiseRequest $request, $id)
+    {
+        $advertise = Advertise::whereNull('deleted_at')->find(base64_decode($id));
+        if (!$advertise) {
+            return $this->sendError([], 'Record Not Found.');
+        }
+        $validated = $request->validated();
+        $advertise->fill($validated)->save();
+        return $this->sendResponse($advertise->id, 'Advertise Updated Successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $advertise = Advertise::whereNull('deleted_at')->find(base64_decode($id));
+        if ($advertise) {
+            $advertise->fill(['deleted_at' => now()])->save();
+            return $this->sendResponse([], 'Advertise Deleted Successfully.');
+        } else {
+            return $this->sendError([], 'Record Not Found.');
+        }
+    }
 
     public function getAdvertise(Request $request)
     {
@@ -89,11 +117,16 @@ class AdvertiseController extends Controller
         $advertise = $this->AdvertiseSingleRecordGet($latitude, $longitude);
         $article = [];
         if ($advertise) {
-            $article = Article::find($advertise->article_id);
+            $article = Article::with('user')->find($advertise->article_id);
             if ($advertise->target == 1) {
-                $today_charges = Transaction::where('article_id', $advertise->article_id)->whereBetween('created_at', [$advertise->start_date, $advertise->end_date])->sum('charge');
-                if ($today_charges >= $advertise->budget) {
-                    $advertise = $this->AdvertiseSingleRecordGet($latitude, $longitude);
+                $today_charges = Transaction::where('article_id', $advertise->article_id)->where('created_at', '>=', Carbon::today())->sum('charge');
+                if ($today_charges >= $advertise->budget || $article->user->balance < 0) {
+                    $article = [];
+                }
+            }
+            if ($advertise->target == 0) {
+                if ($article->user->balance < 0) {
+                    $article = [];
                 }
             }
         }
@@ -112,12 +145,16 @@ class AdvertiseController extends Controller
                 + sin(radians(" . $lat . "))
                 * sin(radians(advertises.latitude))) AS distance"))
                 ->havingRaw('distance < 25')
-            // ->where('status', '==', 'Public')
+                ->where('start_date', '<=', now())
+                ->orWhereNull('end_date')
+                ->orWhereNotNull('end_date', '>=', now())
+                ->whereNull('deleted_at')
                 ->inRandomOrder()->first();
         }
-        if (!$advertise) {
+        if (is_null($advertise)) {
             $advertise = Advertise::where('target', 0)
-            // ->where('status', 'Public')
+                ->where('status', 'Public')
+                ->whereNull('deleted_at')
                 ->inRandomOrder()
                 ->first();
         }
@@ -161,7 +198,7 @@ class AdvertiseController extends Controller
             $charge = $impression_charge + $click_charge;
         }
 
-        //transaction
+        // transaction
         Transaction::create([
             'article_id' => $article,
             'impression' => $impression,
