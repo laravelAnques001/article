@@ -108,10 +108,10 @@ class AdvertiseController extends Controller
         $data = Advertise::with('article')->whereNull('deleted_at')->orderBy('id', 'desc');
 
         return DataTables::of($data)
-            ->addColumn('status', function ($data) {
-                $checked = ($data->status == 'Publish') ? 'checked' : '';
-                return '<input type="checkbox" id="switcherySize2"  data-value="' . base64_encode($data->id) . '"  class="switchery switch" data-size="sm" ' . $checked . '  />';
-            })
+            // ->addColumn('status', function ($data) {
+            //     $checked = ($data->status == 'Publish') ? 'checked' : '';
+            //     return '<input type="checkbox" id="switcherySize2"  data-value="' . base64_encode($data->id) . '"  class="switchery switch" data-size="sm" ' . $checked . '  />';
+            // })
             ->addColumn('action', function ($data) {
                 $data = '<a class="font-size-16" href="' . route('advertise.edit', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-edit fa-1x"></i></a>
                 <a class="font-size-16 " href="' . route('advertise.show', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-eye fa-1x"></i></a>

@@ -16,9 +16,17 @@ class WalletController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $wallet = Wallet::select('id','user_id','transaction_id','amount','created_at')->where('user_id', auth()->id())->whereNull('deleted_at')->orderByDesc('id')->paginate(10);
+        $start_date = isset($request->sd) ? $request->sd : null;
+        $end_date = isset($request->ed) ? $request->ed : $start_date;
+        $wallet = Wallet::select('id', 'user_id', 'transaction_id', 'amount', 'created_at')
+            ->where('user_id', auth()->id())
+            ->whereNull('deleted_at')
+            ->when($start_date && $end_date, function ($q) use ($start_date, $end_date) {
+                $q->whereBetween('created_at', [$start_date, $end_date]);
+            })->orderByDesc('id')
+            ->paginate(20);
         $user = User::find(auth()->id());
         $success = [
             'wallet' => $wallet,
@@ -36,20 +44,12 @@ class WalletController extends Controller
     public function store(WalletTransactionRequest $request)
     {
         $userId = auth()->id();
-        $validated = $request->validated();
-        $response = json_decode($request->payment_response);
-        $amount = 0;
-        $data = isset($response) ? $response : null;
-        if ($data) {
-            $amount = $data->data->amount;
-            $validated['payment_response'] = $request->payment_response;
-        }
-
-        $user = User::where('id', $userId)->first();
-        $user->balance += $amount;
-        $user->save();
-
-        $validated['amount'] = $amount;
+        $validated = $request->validated();       
+        if ($request->status == 'SUCCESS') {    
+            $user = User::where('id', $userId)->first();
+            $user->balance += $request->amount;
+            $user->save();
+        }        
         $validated['user_id'] = $userId;
         $wallet = Wallet::create($validated);
         return $this->sendResponse($wallet->id, 'Wallet Created SuccessFully.');

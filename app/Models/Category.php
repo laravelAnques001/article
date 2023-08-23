@@ -23,7 +23,7 @@ class Category extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image ? asset(Storage::url($this->image)) : '';
+        return $this->image ? (config('app.azure').'/uploads/readwave/'.$this->image) :asset('assets/images/McrkmG7D6RoKVN7k42ojo4mMeN6WM7uZ5RmhUoeM.jpg');
     }
 
     public function parent()

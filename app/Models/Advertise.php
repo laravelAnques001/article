@@ -20,6 +20,7 @@ class Advertise extends Model
         'start_date',
         'end_date',
         'status',
+        'budget_type',
         'created_by',
         'updated_by',
         'deleted_at',
@@ -37,6 +38,10 @@ class Advertise extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function advertiseLatLong(){
+        return $this->hasMany(AdvertiseLatLong::class,'advertise_id');
     }
 
     public static function boot()

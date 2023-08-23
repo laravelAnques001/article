@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Common\AzureComponent;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ArticleRequest;
+use App\Http\Requests\ArticleWebRequest;
 use App\Mail\ArticleApprovedUserMail;
 use App\Models\Article;
 use App\Models\Category;
@@ -13,6 +14,12 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ArticleController extends Controller
 {
+    // public $azure;
+    // public function __construct(Request $request)
+    // {
+    //     parent::__construct($request);
+    //     $this->azure = new AzureComponent();
+    // }
     /**
      * Display a listing of the resource.
      *
@@ -40,11 +47,14 @@ class ArticleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ArticleRequest $request)
+    public function store(ArticleWebRequest $request)
     {
         $validated = $request->validated();
         if ($image = $request->media) {
-            $validated['media'] = $image->store('public/article');
+            // $validated['media'] = $image->store('public/article');
+            $azure = new AzureComponent();
+            $mediaName = $azure->store($image);
+            $validated['media'] = config('app.azure') . "/uploads/readwave/$mediaName";
         }
         $article = Article::create($validated);
         $data = [
@@ -108,18 +118,25 @@ class ArticleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(ArticleRequest $request, $id)
+    public function update(ArticleWebRequest $request, $id)
     {
         $article = Article::with('user')->find(base64_decode($id)) ?? abort(404);
+
         $validated = $request->validated();
         if ($image = $validated['media'] ?? null) {
+            $azure = new AzureComponent();
+            $urlString = config('app.azure') . "/uploads/readwave/";
             if ($oldImage = $article->media ?? null) {
-                $fileCheck = storage_path('app/' . $oldImage);
-                if (file_exists($fileCheck)) {
-                    unlink($fileCheck);
-                }
+                $oldFileName = str_replace($urlString, '', $oldImage);
+                $azure->delete($oldFileName);
+                // $fileCheck = storage_path('app/' . $oldImage);
+                // if (file_exists($fileCheck)) {
+                //     unlink($fileCheck);
+                // }
             }
-            $validated['media'] = $image->store('public/article');
+            $mediaName = $azure->store($image);
+            $validated['media'] = $urlString . $mediaName;
+            // $validated['media'] = $image->store('public/article');
         }
         $article->fill($validated)->save();
 

@@ -108,6 +108,13 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">Status:</label>
+                                    <div class="col-lg-9">
+                                        <p class="form-control"> {{ $advertise->status }} </p>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>

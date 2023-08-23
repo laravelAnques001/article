@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\SendOTPEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -92,7 +93,7 @@ class AuthController extends Controller
                     'expire_at' => $expire_at,
                 ]);
             }
-            // $user->notify(new SendOTPEmail($userOtp));
+            $user->notify(new SendOTPEmail($userOtp));
             return $this->sendResponse([], 'Your Email OTP Send SuccessFully');
         }
 

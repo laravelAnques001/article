@@ -74,7 +74,13 @@
                                     <label class="col-lg-3 control-label">Article Media Type:</label>
                                     <div class="col-lg-9">
                                         <p class="form-control">
-                                            {{ ($article->image_type == 0 ? 'Image' : $article->image_type == 1) ? 'Video' : '' }}
+                                            @if($article->image_type == 0)
+                                            Image
+                                            @elseif($article->image_type == 1)
+                                            Video
+                                            @elseif($article->image_type == 2)
+                                            Youtube Link
+                                            @endif
                                         </p>
                                     </div>
                                 </div>
@@ -83,11 +89,11 @@
                                     <label class="col-lg-3 control-label">Article Media:</label>
                                     <div class="col-lg-9">
                                         @if ($article->image_type == 0)
-                                            <img src="{{ $article->media_url }}" alt="Article Media"
+                                            <img src="{{ $article->media }}" alt="Article Media"
                                                 width="100" height="100">
                                         @elseif ($article->image_type == 1)
                                             <video width="150" height="150" controls>
-                                                <source src="{{ $article->media_url }}" type="">
+                                                <source src="{{ $article->thumbnail }}" type="">
                                             </video>
                                         @endif
                                     </div>

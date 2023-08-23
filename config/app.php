@@ -60,6 +60,8 @@ return [
 
     'asset_url' => env('ASSET_URL', null),
 
+    'azure' => env('AZURE_STORAGE_URL','https://bizzbrain.blob.core.windows.net/teacher'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

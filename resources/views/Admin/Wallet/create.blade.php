@@ -39,7 +39,7 @@
                                 @csrf
                                 <div class="panel-body">
 
-                                    <div class="form-group">
+                                    {{--  <div class="form-group">
                                         <label class="col-lg-3 control-label" for="date">Date:</label>
                                         <div class="col-lg-9">
                                             <input type="datetime-local" class="form-control" name="date" id="date"
@@ -48,7 +48,7 @@
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                    </div>
+                                    </div>  --}}
 
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="user_id">Select User:</label>
@@ -63,6 +63,21 @@
                                                 @endforeach
                                             </select>
                                             @error('user_id')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="status">Select Status:</label>
+                                        <div class="col-lg-9">
+                                            <select class="select" name="status" id="status">
+                                                <option value="">Select Status</option>
+                                                <option value="SUCCESS" {{ old('status')=='SUCCESS'?'selected':''}}>SUCCESS</option>
+                                                <option value="FAILURE" {{ old('status')=='FAILURE'?'selected':''}}>FAILURE</option>
+                                                <option value="CANCEL" {{ old('status')=='CANCEL'?'selected':''}}>CANCEL</option>
+                                            </select>
+                                            @error('status')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -97,6 +112,7 @@
                                         <div class="col-lg-9">
                                             <textarea rows="2" cols="5" class="form-control" name="payment_response" id="payment_response"
                                                 value="{{ old('payment_response') }}" placeholder="Enter Wallet Payment Response"></textarea>
+                                                <span class='text-info'>(Json encode format data added(Payment Response))</span>
                                             @error('payment_response')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror

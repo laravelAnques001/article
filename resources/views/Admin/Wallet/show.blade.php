@@ -38,17 +38,24 @@
                             </div>
                             <div class="panel-body">
 
-                                <div class="form-group">
+                                {{--  <div class="form-group">
                                     <label class="col-lg-3 control-label">Date:</label>
                                     <div class="col-lg-9">
                                         <p class="form-control">{{ $wallet->date }}</p>
                                     </div>
-                                </div>
+                                </div>  --}}
 
                                 <div class="form-group">
                                     <label class="col-lg-3 control-label">User Name:</label>
                                     <div class="col-lg-9">
                                         <p class="form-control">{{ $wallet->user->name }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">Status:</label>
+                                    <div class="col-lg-9">
+                                        <p class="form-control">{{ $wallet->status }}</p>
                                     </div>
                                 </div>
 

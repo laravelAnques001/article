@@ -140,6 +140,21 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="status">Select Status:</label>
+                                        <div class="col-lg-9">
+                                            <select class="select" name="status" id="status">
+                                                <option value="">Select Status</option>
+                                                <option value="Pending" >Pending</option>
+                                                <option value="Published" selected>Published</option>
+                                                <option value="Rejected">Rejected</option>
+                                            </select>
+                                            @error('status')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
                                     <div class="text-right">
                                         <button type="submit" class="btn btn-primary">Submit form <i
                                                 class="icon-arrow-right14 position-right"></i></button>

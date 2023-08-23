@@ -12,10 +12,10 @@ class Wallet extends Model
 
     protected $fillable = [
         'user_id',
-        'date',
         'transaction_id',
         'amount',
         'payment_response',
+        'status',
         'deleted_at',
     ];
 
@@ -26,7 +26,7 @@ class Wallet extends Model
 
     public function getCreatedAtAttribute($date)
     {
-        return Carbon::parse($date)->format('F d, Y');
+        return Carbon::parse($date)->format('F d, Y H:i:s');
     }
 
 }

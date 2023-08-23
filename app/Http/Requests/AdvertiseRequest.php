@@ -27,11 +27,10 @@ class AdvertiseRequest extends FormRequest
         $rules = [
             'article_id' => 'required|exists:articles,id',
             'target' => 'required|in:0,1',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'locations' => 'nullable|string',
             'redis' => 'nullable|numeric',
             'budget' => 'nullable|numeric',
-
+            'budget_type ' => 'nullable|in:0,1',
         ];
         if ($this->is('api/*')) {
             $rules['start_date'] = 'nullable|date_format:Y-m-d H:i:s';

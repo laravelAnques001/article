@@ -62,13 +62,16 @@
                         "data": "user_id"
                     },
                     {
+                        "data": "status"
+                    },
+                    {
                         "data": "transaction_id"
                     },
                     {
                         "data": "amount"
                     },
                     {
-                        "data": "date"
+                        "data": "created_at"
                     },
                 ]
             });
@@ -217,6 +220,7 @@
                                     <th>Action</th>
                                     <th>#</th>
                                     <th>User Name</th>
+                                    <th>Status</th>
                                     <th>Transaction Id</th>
                                     <th>Amount</th>
                                     <th>Date</th>

@@ -49,7 +49,7 @@
                                                 <option value="">Select Category</option>
                                                 @foreach ($categoryList as $category)
                                                     <option value="{{ $category->id }}"
-                                                        {{ $article->category_id == $category->id ? 'selected' : null }}>
+                                                        {{ old('category_id',$article->category_id) == $category->id ? 'selected' : null }}>
                                                         {{ $category->name }}</option>
                                                 @endforeach
                                             </select>
@@ -145,11 +145,11 @@
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                             @if ($article->image_type == 0)
-                                                <img src="{{ $article->media_url }}" alt="Article Media" width="100"
+                                                <img src="{{ $article->media }}" alt="Article Media" width="100"
                                                     height="100">
                                             @elseif ($article->image_type == 1)
                                                 <video width="150" height="150" controls>
-                                                    <source src="{{ $article->media_url }}" type="">
+                                                    <source src="{{ $article->thumbnail }}" type="">
                                                 </video>
                                             @endif
                                         </div>

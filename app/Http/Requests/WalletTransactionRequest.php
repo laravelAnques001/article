@@ -26,6 +26,8 @@ class WalletTransactionRequest extends FormRequest
         return [
             'transaction_id' => 'required|string',
             'payment_response' => 'required|string',
+            'status' => 'required|in:CANCEL,FAILURE,SUCCESS',
+            'amount' =>'required|regex:/^\d*(\.\d{2})?$/'
         ];
     }
 }

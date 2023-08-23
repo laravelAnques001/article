@@ -34,13 +34,15 @@ Route::get('article-notification', [ArticleController::class, 'articleNotificati
 Route::post('advertise-get', [AdvertiseController::class, 'getAdvertise']);
 Route::post('article-like-share', [ArticleController::class, 'likeShare']);
 
+// categories
+Route::get('categories', [CategoryController::class, 'index']);
+Route::get('categories/{category}', [CategoryController::class, 'show']);
+
 Route::middleware(['auth:api'])->Group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('profile-update', [AuthController::class, 'profileUpdate']);
 
     // categories
-    Route::get('categories', [CategoryController::class, 'index']);
-    Route::get('categories/{category}', [CategoryController::class, 'show']);
     Route::post('user-category', [CategoryController::class, 'userCategory']);
 
     // article
@@ -62,6 +64,7 @@ Route::middleware(['auth:api'])->Group(function () {
 
     // advertise
     Route::get('advertise', [AdvertiseController::class, 'index']);
+    Route::get('advertise/{advertise}', [AdvertiseController::class, 'show']);
     Route::post('advertise', [AdvertiseController::class, 'store']);
     Route::post('edit-advertise/{advertise}', [AdvertiseController::class, 'update']);
     Route::delete('advertise/{advertise}', [AdvertiseController::class, 'destroy']);

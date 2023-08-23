@@ -185,24 +185,24 @@ class ArticleController extends Controller
             ],
         ];
 
-        $encodedData = json_encode($data);
-        $apiKey = env('FIREBASE_API_KEY');
+        // $encodedData = json_encode($data);
+        // $apiKey = env('FIREBASE_API_KEY');
         $serverKey = env('FIREBASE_SERVER_KEY');
         $headers = array(
             'Authorization: key=' . $serverKey,
             'Content-Type: application/json',
         );
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
-        $result = curl_exec($ch);
-        curl_close($ch);
+        $this->curl_data('https://fcm.googleapis.com/fcm/send', $data, $headers);
+        // $ch = curl_init();
+        // curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+        // curl_setopt($ch, CURLOPT_POST, true);
+        // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        // curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
+        // $result = curl_exec($ch);
+        // curl_close($ch);
 
         ArticleNotification::create([
             'article_id' => $article->id,

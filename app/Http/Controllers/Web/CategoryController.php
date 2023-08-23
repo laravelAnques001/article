@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Common\AzureComponent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
@@ -50,8 +50,10 @@ class CategoryController extends Controller
         //     return redirect()->route('category.index')->withErrors($validator)->withInput();
         // }
         $validated = $request->validated();
-        if ($image = $request->image) {
-            $validated['image'] = $image->store('public/category');
+        if ($request->hasFile('image')) {
+            // $validated['image'] = $request->image->store('public/category');
+            $azure = new AzureComponent();
+            $validated['image'] = $azure->store($request->image);
         }
         Category::create($validated);
         return redirect()->route('category.index')->with('success', 'Category Created SuccessFully.');
@@ -93,14 +95,18 @@ class CategoryController extends Controller
     {
         $category = Category::find(base64_decode($id)) ?? abort(404);
         $validated = $request->validated();
-        if ($image = $validated['image'] ?? null) {
-            if ($oldImage = $category->image ?? null) {
-                $fileCheck = storage_path('app/' . $oldImage);
-                if (file_exists($fileCheck)) {
-                    unlink($fileCheck);
-                }
+        if ($image = $request->image ?? null) {
+            $azure = new AzureComponent();
+            $oldImage = isset($category->image) ? $category->image : null;
+            if ($oldImage) {
+                // $fileCheck = storage_path('app/' . $oldImage);
+                // if (file_exists($fileCheck)) {
+                //     unlink($fileCheck);
+                $azure->delete($oldImage);
             }
-            $validated['image'] = $image->store('public/category');
+            // }
+            // $validated['image'] = $image->store('public/category');
+            $validated['image'] = $azure->store($image);
         }
         $category->fill($validated)->save();
         return redirect()->route('category.index')->with('success', 'Category Updated SuccessFully.');
