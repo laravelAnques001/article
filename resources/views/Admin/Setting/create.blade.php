@@ -53,7 +53,7 @@
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="value">Value:</label>
                                         <div class="col-lg-9">
-                                            <textarea class="ckeditor form-control" name="value"></textarea>
+                                            <textarea class="ckeditor form-control" name="value" placeholder="Enter Value"></textarea>
                                             @error('value')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
@@ -79,11 +79,11 @@
         <!-- /content area -->
     </div>
 @endsection
-@push('custom-scripts')
+{{--  @push('custom-scripts')
     <script src="//cdn.ckeditor.com/4.14.1/standard/ckeditor.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
             $('.ckeditor').ckeditor();
         });
     </script>
-@endpush
+@endpush  --}}

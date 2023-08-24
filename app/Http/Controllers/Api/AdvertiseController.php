@@ -7,12 +7,14 @@ use App\Http\Requests\AdvertiseRequest;
 use App\Models\Advertise;
 use App\Models\AdvertiseLatLong;
 use App\Models\Article;
+use App\Models\Setting;
 use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AdvertiseController extends Controller
 {
@@ -26,27 +28,30 @@ class AdvertiseController extends Controller
         $search = $request->search;
         $userId = auth()->id();
         if ($search) {
-            $advertise = Advertise::select('id', 'article_id', 'start_date', 'end_date', 'status')
-                ->with(['article' => function ($q) {
-                    $q->select('id', 'title', 'image_type', 'media', 'thumbnail');
-                }])
-                ->orWhereHas('article', function ($q) use ($search, $userId) {
-                    $q->where('title', 'like', '%' . $search . '%');
-                    $q->where('user_id', $userId);
+            $advertise = Advertise::select('id', 'article_id', 'target', 'budget', 'budget_type', 'ad_status', 'start_date', 'end_date', 'status')->with('article', 'advertiseLatLong')
+                ->whereHas('article', function ($q) use ($search, $userId) {
+                    $q->select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression', 'share');
+                    $q->orWhere('title', 'like', '%' . $search . '%');
+                    $q->orWhere('user_id', $userId);
                 })
                 ->orWhere('target', 'like', '%' . $search . '%')
                 ->orWhere('budget', 'like', '%' . $search . '%')
                 ->orWhere('start_date', 'like', '%' . $search . '%')
                 ->orWhere('end_date', 'like', '%' . $search . '%')
                 ->whereNull('deleted_at')
+                ->orderByDesc('id')
                 ->paginate(10);
         } else {
-            $advertise = Advertise::select('id', 'article_id', 'start_date', 'end_date', 'status')
-                ->with(['article' => function ($q) use ($userId) {
-                    $q->select('id', 'title', 'image_type', 'media', 'thumbnail');
+            $advertise = Advertise::select('id', 'article_id', 'target', 'budget', 'budget_type', 'ad_status', 'start_date', 'end_date', 'status')->with('article', 'advertiseLatLong')
+                ->whereHas('article', function ($q) use ($userId) {
+                    $q->select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression', 'share');
                     $q->where('user_id', $userId);
-                }])
-                ->whereNull('deleted_at')->paginate(10);
+                    $q->withSum('transaction', 'impression');
+                })
+                ->whereNull('deleted_at')
+                ->where('status', 'Published')
+                ->orderByDesc('id')
+                ->paginate(10);
         }
         return $this->sendResponse($advertise, 'Advertise List Get Successfully.');
     }
@@ -82,10 +87,10 @@ class AdvertiseController extends Controller
      */
     public function show($id)
     {
-        $advertise = Advertise::select('id', 'article_id', 'target', 'latitude', 'longitude', 'redis', 'budget', 'start_date', 'end_date', 'status')
-            ->with(['article' => function ($q) {
-                $q->select('id', 'title', 'media', 'created_at');
-            }])
+        $advertise = Advertise::select('id', 'article_id', 'target', 'budget', 'budget_type', 'ad_status', 'start_date', 'end_date', 'status')->with('article', 'advertiseLatLong')
+            ->whereHas('article', function ($q) {
+                $q->select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression', 'share');
+            })
             ->whereNull('deleted_at')
             ->find(base64_decode($id));
         if ($advertise) {
@@ -138,36 +143,60 @@ class AdvertiseController extends Controller
         $latitude = isset($request->latitude) ? $request->latitude : null;
         $longitude = isset($request->longitude) ? $request->longitude : null;
 
-        // return Advertise::query()->with(['advertiseLatLong' => function($q) use($latitude,$longitude){
-        //         $q->selectRaw(DB::raw("6371 * acos(cos(radians(" . $latitude . "))
-        //         * cos(radians(advertises.latitude))
-        //         * cos(radians(advertises.longitude) - radians(" . $longitude . "))
-        //         + sin(radians(" . $latitude . "))
-        //         * sin(radians(advertises.latitude))) AS distance"))
-        //         ->havingRaw('distance < 25');
-        // }])->get();
-
-        // $advertise = DB::table('advertises')
-        //         ->select('id', 'article_id', 'target', 'budget', 'start_date', 'end_date','status', DB::raw("6371 * acos(cos(radians(" . $lat . "))
-        //         * cos(radians(advertises.latitude))
-        //         * cos(radians(advertises.longitude) - radians(" . $log . "))
-        //         + sin(radians(" . $lat . "))
-        //         * sin(radians(advertises.latitude))) AS distance"))
-        //         ->havingRaw('distance < 25')
-        //         ->where('start_date', '<=', now())
-        //         // ->orWhereNull('end_date')
-        //         ->orWhereNotNull('end_date', '>=', now())
-        //         ->whereRaw('status','Published')
-        //         ->whereNull('deleted_at')
-        //         ->inRandomOrder()
-        //         ->first();
-
-        // $haversine = "(6371 * acos(cos(radians($latitude))* cos(radians(`advertise_lat_longs.latitude`))* cos(radians(`advertise_lat_longs.longitude`) - radians($longitude))+ sin(radians($latitude)) * sin(radians(`advertise_lat_longs.latitude`))))";
+        // $haversine = "(6371 * acos(cos(radians($latitude))* cos(radians(`latitude`))* cos(radians(`longitude`) - radians($longitude))+ sin(radians($latitude)) * sin(radians(`latitude`))))";
 
         // return Advertise::with('advertiseLatLong')->whereHas('advertiseLatLong' , function($q) use($haversine){
         //     $q->selectRaw("$haversine AS distance")
         //     ->having("distance", "<=", 25);
-        // })->first();
+        // })->inRandomOrder()->first();
+
+        // $nearbyLocationNames = Redis::georadius('locations', $longitude, $latitude, 25, 'km');
+        // return $nearbyLocationNames;
+        // $showResult = DB::table("advertise_lat_longs")
+        //     ->select(DB::raw("6371 * acos(cos(radians(" . $latitude . "))
+        //     * cos(radians(advertise_lat_longs.lat))
+        //     * cos(radians(advertise_lat_longs.lon) - radians(" . $longitude . "))
+        //     + sin(radians(" . $latitude . "))
+        //     * sin(radians(advertise_lat_longs.lat))) AS distance"))
+        //     ->get();
+        // return $showResult;
+
+        // $query = "SELECT *, (6371 * acos (cos (radians(:target_latitude))* cos(radians(latitude))* cos( radians(:target_latitude) - radians(longitude) )+ sin (radians(:target_latitude) )* sin(radians(latitude)))) AS distance FROM advertise_lat_longs HAVING distance <= 25";
+
+        // $query = "SELECT *,6371 * ACOS(COS(RADIANS(latitude)) * COS(RADIANS(:target_latitude)) * COS(RADIANS(:target_longitude) - RADIANS(longitude)) + SIN(RADIANS(latitude)) * SIN(RADIANS(:target_latitude))) AS distance FROM advertise_lat_longs";
+
+        // $bindings = [
+        //     'target_latitude' => $latitude,
+        //     'target_longitude' => $longitude,
+        // ];
+        // return DB::query($query, $bindings);
+
+        // $radius = 400;
+        // return AdvertiseLatLong::selectRaw("latitude, longitude,
+        // ( 6371000  acos( cos( radians(?) )
+        //   cos( radians( latitude ) )
+        //   * cos( radians( longitude ) - radians(?)
+        //   ) + sin( radians(?) ) *
+        //   sin( radians( latitude ) ) )
+        // ) AS distance", [$latitude, $longitude, $latitude])
+        //     ->having("distance", "<", $radius)
+        //     ->orderBy("distance", 'asc')
+        //     ->offset(0)
+        //     ->limit(20)
+        //     ->get();
+
+        // return $results;
+
+        // return DB::query($query);
+        // return DB::table('advertise_lat_longs')
+        //     ->select('*', DB::raw("6371 * acos(cos(radians(" . $latitude . "))
+        // * cos(radians(latitude))
+        // * cos(radians(longitude) - radians(" . $longitude . "))
+        // + sin(radians(" . $latitude . "))
+        // * sin(radians(latitude))) AS distance"))
+        // // ->join('advertises','advertises.id','=','advertise_lat_longs.advertise_id')
+        //     ->havingRaw('distance <= 25')
+        //     ->toSql();
 
         $advertise = $this->AdvertiseSingleRecordGet($latitude, $longitude);
         // return $advertise;
@@ -184,7 +213,6 @@ class AdvertiseController extends Controller
             if ($advertise->target == 1) {
                 $today_charges = Transaction::where('article_id', $advertise->article_id)->where('created_at', '>=', Carbon::today())->sum('charge');
                 if ($today_charges >= $advertise->budget || $article->user->balance < 0) {
-
                     $article = null;
                 }
             }
@@ -194,7 +222,6 @@ class AdvertiseController extends Controller
                 }
             }
         }
-
         return $this->sendResponse($article, 'Advertise Record Get Successfully.');
     }
 
@@ -202,29 +229,28 @@ class AdvertiseController extends Controller
     {
         $advertise = null;
         if ($lat && $log) {
-            $status = 'Published';
-            $advertise = DB::table('advertises')
-                ->select('id', 'article_id', 'target', 'budget', 'start_date', 'end_date', 'status', DB::raw("6371 * acos(cos(radians(" . $lat . "))
-                * cos(radians(advertises.latitude))
-                * cos(radians(advertises.longitude) - radians(" . $log . "))
-                + sin(radians(" . $lat . "))
-                * sin(radians(advertises.latitude))) AS distance"))
-                ->havingRaw('distance < 25')
-                ->where('start_date', '<=', now())
-            // ->orWhereNull('end_date')
-                ->orWhereNotNull('end_date', '>=', now())
-                ->whereRaw('status', 'Published')
-                ->whereNull('deleted_at')
-                ->inRandomOrder()
-                ->first();
-
+            // $advertise = DB::table('advertises')
+            //     ->select('id', 'article_id', 'target', 'budget', 'start_date', 'end_date', 'status', DB::raw("6371 * acos(cos(radians(" . $lat . "))
+            //     * cos(radians(advertises.latitude))
+            //     * cos(radians(advertises.longitude) - radians(" . $log . "))
+            //     + sin(radians(" . $lat . "))
+            //     * sin(radians(advertises.latitude))) AS distance"))
+            //     ->havingRaw('distance < 25')
+            //     ->where('start_date', '<=', now())
+            // // ->orWhereNull('end_date')
+            //     ->orWhereNotNull('end_date', '>=', now())
+            //     ->whereRaw('status', 'Published')
+            //     ->whereRaw('ad_status', 0)
+            //     ->whereNull('deleted_at')
+            //     ->inRandomOrder()
+            //     ->first();
         }
         // return $advertise;
         if (is_null($advertise)) {
             $advertise = Advertise::where('target', 0)
-                ->where('status', 'Public')
                 ->whereNull('deleted_at')
                 ->where('status', 'Published')
+                ->where('ad_status', 0)
                 ->inRandomOrder()
                 ->first();
         }
@@ -234,7 +260,7 @@ class AdvertiseController extends Controller
     public function impressionClick(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'article_id' => 'required|exists:articles,id',
+            'article_id' => ['required', Rule::exists('articles', 'id')->whereNull('deleted_at')],
             'impression' => 'nullable|in:0,1',
             'click' => 'nullable|in:0,1',
             'device_detail' => 'nullable|string',
@@ -249,23 +275,19 @@ class AdvertiseController extends Controller
         $click = isset($request->click) ? $request->click : 0;
         $device_detail = isset($request->device_detail) ? $request->device_detail : null;
 
-        //impression add
+        // impression and click increment
         $impressionArticle = Article::whereNull('deleted_at')->find($article);
-        $impressionArticle->impression += 1;
-        $impressionArticle->save();
 
-        $charge = 0;
-        $impression_charge = 0.25;
-        $click_charge = 0.50;
-
+        // charge impression and click
+        $setting = Setting::whereIn('key', ['impression', 'click'])->pluck('value', 'key')->toArray();
+        $impression_charge = $click_charge = 0;
         if ($impression) {
-            $charge = $impression_charge;
+            $impression_charge = $setting['impression'];
+            $impressionArticle->impression += 1;
+            $impressionArticle->save();
         }
         if ($click) {
-            $charge = $click_charge;
-        }
-        if ($click && $impression) {
-            $charge = $impression_charge + $click_charge;
+            $click_charge = $setting['click'];
         }
 
         // transaction
@@ -274,13 +296,16 @@ class AdvertiseController extends Controller
             'impression' => $impression,
             'click' => $click,
             'device_detail' => $device_detail,
-            'charge' => $charge,
+            'impression_charge' => $impression_charge,
+            'click_charge' => $click_charge,
         ]);
 
-        // article author balance
-        $user = User::find($impressionArticle->user_id);
-        $user->balance -= $charge;
-        $user->save();
+        //article author balance
+        if ($impressionArticle) {
+            $user = User::find($impressionArticle->user_id);
+            $user->balance -= ($impression_charge + $click_charge);
+            $user->save();
+        }
 
         return $this->sendResponse([], 'Article Impression Added.');
     }

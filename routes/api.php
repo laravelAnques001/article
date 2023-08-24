@@ -38,6 +38,9 @@ Route::post('article-like-share', [ArticleController::class, 'likeShare']);
 Route::get('categories', [CategoryController::class, 'index']);
 Route::get('categories/{category}', [CategoryController::class, 'show']);
 
+// article impression +
+Route::get('article-impression/{article}', [ArticleController::class, 'impressionIncrement']);
+
 Route::middleware(['auth:api'])->Group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('profile-update', [AuthController::class, 'profileUpdate']);

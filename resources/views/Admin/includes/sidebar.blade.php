@@ -27,10 +27,10 @@
                             href="{{ route('wallet.index') }}"><i class="icon-book"></i>
                             <span>Wallet</span></a>
                     </li>
-                    {{--  <li class="{{ Route::currentRouteName() == 'setting.*' ? 'active' : '' }}"><a
+                    <li class="{{ Route::currentRouteName() == 'setting.*' ? 'active' : '' }}"><a
                             href="{{ route('setting.index') }}"><i class="fa fa-gear"></i>
                             <span>Setting</span></a>
-                    </li>  --}}
+                    </li>
                 </ul>
             </div>
         </div>

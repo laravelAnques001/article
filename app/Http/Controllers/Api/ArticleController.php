@@ -302,6 +302,7 @@ class ArticleController extends Controller
         $validated = Validator::make($request->all(), [
             'article_id' => 'required|exists:articles,id',
             'share' => 'nullable|in:1,0',
+            'impressions' => 'nullable|in:1,0',
         ]);
 
         if ($validated->fails()) {
@@ -309,8 +310,12 @@ class ArticleController extends Controller
         }
 
         //article start
+        $share = isset($request->share) ? 1 : 0;
+        $impressions = isset($request->impressions) ? 1 : 0;
+
         $article = Article::find($request->article_id);
-        $article->share += 1;
+        $article->share += $share;
+        $article->impressions += $impressions;
         $article->save();
         //article end
 
@@ -324,6 +329,7 @@ class ArticleController extends Controller
             'like' => 'nullable|in:1,0',
             'impressions' => 'nullable|in:1,0',
             'bookmark' => 'nullable|in:1,0',
+            'report' => 'nullable|string',
         ]);
 
         if ($validated->fails()) {
@@ -380,5 +386,13 @@ class ArticleController extends Controller
         }])->orderByDesc('id')->paginate(10);
 
         return $this->sendResponse($notification, 'Article List Get Successfully.');
+    }
+
+    public function impressionIncrement($id)
+    {
+        $article = Article::find(base64_decode($id));
+        $article->impression += 1;
+        $article->save();
+        return $this->sendResponse(['count' => $article->impression], 'Article List Get Successfully.');
     }
 }

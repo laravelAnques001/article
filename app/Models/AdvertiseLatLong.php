@@ -12,6 +12,7 @@ class AdvertiseLatLong extends Model
 
     protected $fillable=[
         'advertise_id',
+        'location',
         'latitude',
         'longitude',
     ];
@@ -20,5 +21,5 @@ class AdvertiseLatLong extends Model
     public function advertiseLatLong(){
         return $this->belongTo(Advertise::class,'advertise_id');
     }
-    
+
 }

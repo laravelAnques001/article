@@ -36,6 +36,10 @@ class Article extends Model
         'like',
         'day_ago',
         'web_link',
+        'ad_impression_count',
+        'ad_impression_charge_count',
+        'ad_click_count',
+        'ad_click_charge_count',
     ];
 
     protected $casts = [
@@ -95,6 +99,31 @@ class Article extends Model
     public function getLikeAttribute()
     {
         return $this->hasMany(ArticleLikeShare::class, 'article_id')->where('like', 1)->where('user_id', auth()->id())->count() ?? 0;
+    }
+
+    public function getAdImpressionCountAttribute()
+    {
+        return $this->transaction()->where('impression', 1)->count() ?? 0;
+    }
+
+    public function getAdImpressionChargeCountAttribute()
+    {
+        return $this->transaction()->where('impression', 1)->sum('impression_charge') ?? 0;
+    }
+
+    public function getAdClickCountAttribute()
+    {
+        return $this->transaction()->where('click', 1)->count() ?? 0;
+    }
+
+    public function getAdClickChargeCountAttribute()
+    {
+        return $this->transaction()->where('click', 1)->sum('click_charge') ?? 0;
+    }
+
+    public function transaction()
+    {
+        return $this->hasMany(Transaction::class, 'article_id');
     }
 
     public static function boot()
