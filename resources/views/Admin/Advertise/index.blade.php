@@ -65,15 +65,6 @@
                         "data": "target"
                     },
                     {
-                        "data": "latitude"
-                    },
-                    {
-                        "data": "longitude"
-                    },
-                    {
-                        "data": "redis"
-                    },
-                    {
                         "data": "budget"
                     },
                     {
@@ -83,7 +74,16 @@
                         "data": "end_date"
                     },
                     {
+                        "data": "impression"
+                    },
+                    {
+                        "data": "click"
+                    },
+                    {
                         "data": "status"
+                    },
+                    {
+                        "data": "ad_status"
                     },
                 ]
             });
@@ -190,22 +190,48 @@
 
                 $(".switch").change(function() {
                     var id = $(this).attr("data-value");
-                    var state = 'In-Review';
+                    var state = 0;
                     if ($(this).prop("checked") == true) {
-                        state = 'Publish';
+                        state = 0;
                     } else if ($(this).prop("checked") == false) {
-                        state = 'In-Review';
+                        state = 1;
                     }
-                    var url = "{{ URL::to('advertise') }}";
+                    var url = "{{ URL::to('advertise/ad_status') }}";
                     url = url + "/" + id + "/" + state;
                     $.ajax({
                         url: url,
                     }).done(function(data) {
                         if (data == 1) {
-                            if (state == 'Publish') {
-                                toastr.success('Advertise has been Publish', 'Activated');
+                            if (state == 0) {
+                                toastr.success('Advertise has been On', 'Activated');
                             } else {
-                                toastr.error('Advertise has been In-Review', 'Deactivated');
+                                toastr.error('Advertise has been Off', 'Deactivated');
+                            }
+                        } else {
+                            toastr.error('Something went wrong..', 'Error');
+                        }
+
+                    });
+                });
+
+                $(".switchStatus").change(function() {
+                    var id = $(this).attr("data-value");
+                    var state = 'Published';
+                    if ($(this).prop("checked") == true) {
+                        state = 'Published';
+                    } else if ($(this).prop("checked") == false) {
+                        state = 'Pending';
+                    }
+                    var url = "{{ URL::to('advertise/status') }}";
+                    url = url + "/" + id + "/" + state;
+                    $.ajax({
+                        url: url,
+                    }).done(function(data) {
+                        if (data == 1) {
+                            if (state == 'Published') {
+                                toastr.success('Advertise has been Published', 'Activated');
+                            } else {
+                                toastr.error('Advertise has been pending', 'Deactivated');
                             }
                         } else {
                             toastr.error('Something went wrong..', 'Error');
@@ -259,13 +285,13 @@
                                     <th>#</th>
                                     <th>Article Title</th>
                                     <th>Target</th>
-                                    <th>Latitude</th>
-                                    <th>Longitude</th>
-                                    <th>Redis</th>
                                     <th>Budget</th>
                                     <th>Start Date</th>
                                     <th>End Date</th>
-                                    <th>Status</th>
+                                    <th>Impressions</th>
+                                    <th>Clicks</th>
+                                    <th>Status <br><small style="font-size: 70%;">(On=Published,Off=Pending)</small></th>
+                                    <th>Ads Status</th>
                                 </tr>
                             </thead>
                         </table>

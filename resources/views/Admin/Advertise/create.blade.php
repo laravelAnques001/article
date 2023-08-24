@@ -73,39 +73,6 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="latitude">Latitude:</label>
-                                        <div class="col-lg-9">
-                                            <input type="text" class="form-control" name="latitude" id="latitude"
-                                                placeholder="Enter Advertise Latitude" value="{{ old('latitude') }}">
-                                            @error('latitude')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="longitude">Longitude:</label>
-                                        <div class="col-lg-9">
-                                            <input type="text" class="form-control" name="longitude" id="longitude"
-                                                placeholder="Enter Advertise Longitude" value="{{ old('longitude') }}">
-                                            @error('longitude')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="redis">Redis:</label>
-                                        <div class="col-lg-9">
-                                            <input type="text" class="form-control" name="redis" id="redis"
-                                                placeholder="Enter Advertise Redis" value="{{ old('redis') }}">
-                                            @error('redis')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
                                         <label class="col-lg-3 control-label" for="budget">Budget:</label>
                                         <div class="col-lg-9">
                                             <input type="text" class="form-control" name="budget" id="budget"

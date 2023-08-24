@@ -39,6 +39,8 @@ class AdvertiseController extends Controller
                 ->orWhere('start_date', 'like', '%' . $search . '%')
                 ->orWhere('end_date', 'like', '%' . $search . '%')
                 ->whereNull('deleted_at')
+                ->where('status', 'Published')
+                ->where('ad_status', 0)
                 ->orderByDesc('id')
                 ->paginate(10);
         } else {
@@ -46,10 +48,10 @@ class AdvertiseController extends Controller
                 ->whereHas('article', function ($q) use ($userId) {
                     $q->select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression', 'share');
                     $q->where('user_id', $userId);
-                    $q->withSum('transaction', 'impression');
                 })
                 ->whereNull('deleted_at')
                 ->where('status', 'Published')
+                ->where('ad_status', 0)
                 ->orderByDesc('id')
                 ->paginate(10);
         }

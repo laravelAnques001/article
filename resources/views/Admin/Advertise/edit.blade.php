@@ -1,5 +1,9 @@
 @extends('Admin.layouts.common')
 @section('content')
+    @php
+        $start_date = date('Y-m-d\TH:i', strtotime($advertise->start_date));
+        $end_date = date('Y-m-d\TH:i', strtotime($advertise->end_date));
+    @endphp
     <div>
         <!-- Page header -->
         <div class="page-header">
@@ -41,7 +45,7 @@
                                 @method('PUT')
                                 <div class="panel-body">
                                     <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="article_id">Target:</label>
+                                        <label class="col-lg-3 control-label" for="article_id">Select Article:</label>
                                         <div class="col-lg-9">
                                             <select class="select" name="article_id" id="article_id">
                                                 <option value="">Select Target</option>
@@ -74,42 +78,6 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="latitude">Advertise Latitude:</label>
-                                        <div class="col-lg-9">
-                                            <input type="text" class="form-control" name="latitude" id="latitude"
-                                                placeholder="Enter Article Latitude"
-                                                value="{{ old('latitude', $advertise->latitude) }}">
-                                            @error('latitude')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="longitude">Advertise Longitude:</label>
-                                        <div class="col-lg-9">
-                                            <input type="text" class="form-control" name="longitude" id="longitude"
-                                                placeholder="Enter Article Longitude"
-                                                value="{{ old('longitude', $advertise->longitude) }}">
-                                            @error('longitude')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="redis">Redis:</label>
-                                        <div class="col-lg-9">
-                                            <input type="text" class="form-control" name="redis" id="redis"
-                                                placeholder="Enter Advertise Redis"
-                                                value="{{ old('redis', $advertise->redis) }}">
-                                            @error('redis')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
                                         <label class="col-lg-3 control-label" for="budget">Advertise Budget:</label>
                                         <div class="col-lg-9">
                                             <input type="text" class="form-control" name="budget" id="budget"
@@ -126,7 +94,7 @@
                                         <div class="col-lg-9">
                                             <input type="datetime-local" class="form-control" name="start_date"
                                                 id="start_date" placeholder="Enter Article Start Date"
-                                                value="{{ old('start_date', $advertise->start_date) }}">
+                                                value="{{ old('start_date', $start_date) }}">
                                             @error('start_date')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
@@ -136,9 +104,9 @@
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="end_date">End Date:</label>
                                         <div class="col-lg-9">
-                                            <input type="datetime-local" class="form-control" name="end_date"
-                                                id="end_date" placeholder="Enter Article End Date"
-                                                value="{{ old('end_date', $advertise->end_date) }}">
+                                            <input type="datetime-local" class="form-control" name="end_date" id="end_date"
+                                                placeholder="Enter Article End Date"
+                                                value="{{ old('end_date', $end_date) }}">
                                             @error('end_date')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
@@ -150,9 +118,16 @@
                                         <div class="col-lg-9">
                                             <select class="select" name="status" id="status">
                                                 <option value="">Select Status</option>
-                                                <option value="Pending" {{ old('status',$advertise->status)=='Pending'?'selected':''}}>Pending</option>
-                                                <option value="Published" {{ old('status',$advertise->status)=='Published'?'selected':''}}>Published</option>
-                                                <option value="Rejected" {{ old('status',$advertise->status)=='Rejected'?'selected':''}}>Rejected</option>
+                                                <option value="Pending"
+                                                    {{ old('status', $advertise->status) == 'Pending' ? 'selected' : '' }}>
+                                                    Pending
+                                                </option>
+                                                <option value="Published"
+                                                    {{ old('status', $advertise->status) == 'Published' ? 'selected' : '' }}>
+                                                    Published</option>
+                                                <option value="Rejected"
+                                                    {{ old('status', $advertise->status) == 'Rejected' ? 'selected' : '' }}>
+                                                    Rejected</option>
                                             </select>
                                             @error('status')
                                                 <span class="error">{{ $message }}</span>
