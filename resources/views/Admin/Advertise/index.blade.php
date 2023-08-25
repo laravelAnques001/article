@@ -290,7 +290,7 @@
                                     <th>End Date</th>
                                     <th>Impressions</th>
                                     <th>Clicks</th>
-                                    <th>Status <br><small style="font-size: 70%;">(On=Published,Off=Pending)</small></th>
+                                    <th>Status<br><small style="font-size: 70%;">(On=Published,Off=Pending)</small></th>
                                     <th>Ads Status</th>
                                 </tr>
                             </thead>

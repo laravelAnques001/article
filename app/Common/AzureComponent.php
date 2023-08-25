@@ -20,7 +20,7 @@ class AzureComponent
             }
             return $strippedName;
         }
-    }F
+    }
 
     public function getFile($file = null)
     {

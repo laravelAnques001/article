@@ -187,7 +187,22 @@ class ArticleController extends Controller
                 return date('Y-m-d H:i:s', strtotime($data->created_at));
             })
             ->addColumn('category_name', function ($data) {
-                return $data->category->name ?? '';
+                $categories = isset($data->category) ? $data->category : null;
+                if ($categories) {
+                    $category_name = [];
+                    foreach ($categories as $category) {
+                        $category_name[]= $category->name;
+                    }
+                    return join(", ",$category_name);
+                }
+                return;
+            })
+            ->editColumn('status', function ($data) {
+                if ($data->status == 'Rejected') {
+                    return '<span>Rejected</span>';
+                }
+                $checked = ($data->status == 'Approved') ? 'checked' : '';
+                return '<input type="checkbox" id="switcherySize2"  data-value="' . base64_encode($data->id) . '"  class="switchery switch" data-size="sm" ' . $checked . '  />';
             })
             ->editColumn('link', function ($data) {
                 return '<a href="' . $data->link . '"  title="Article" target="_blank">' . $data->link . '</a>';
@@ -207,7 +222,7 @@ class ArticleController extends Controller
                     }
                 }
                 return;
-            })->rawColumns(['date', 'action', 'category_name', 'image', 'link', 'active', 'user_id'])
+            })->rawColumns(['date', 'action', 'category_name', 'image', 'link', 'active', 'user_id','status'])
             ->addIndexColumn()
             ->toJson();
     }

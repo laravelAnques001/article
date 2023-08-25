@@ -4,16 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticleRequest;
+use App\Jobs\ArticleCreateFirebaseJob;
 use App\Mail\ArticleCreateAdminMail;
 use App\Models\Article;
 use App\Models\ArticleLikeShare;
 use App\Models\ArticleNotification;
 use App\Models\CategoryUser;
-use App\Models\User;
-use App\Notifications\SendPushNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -81,11 +79,11 @@ class ArticleController extends Controller
         } elseif ($bookmarked) {
             $articlesData = $articles->whereHas('articleLikeShare', function ($q) use ($userId) {
                 $q->where('bookmark', 1)->where('user_id', $userId);
-            })->where('status', 'Approved')->orderByDesc('id')->paginate(10);
+            })->orderByDesc('id')->paginate(10);
         } elseif ($trending) {
-            $articlesData = $articles->orderByDesc('impression')->paginate(10);
+            $articlesData = $articles->where('status', 'Approved')->orderByDesc('impression')->paginate(10);
         } elseif ($insights) {
-            $articlesData = $articles->orderByDesc('id')->paginate(10);
+            $articlesData = $articles->where('status', 'Approved')->orderByDesc('id')->paginate(10);
         } elseif ($relevanceStories) {
             $articlesData = $articles->where('status', 'Approved')->orderByDesc('id')->paginate(10);
         } else {
@@ -112,7 +110,9 @@ class ArticleController extends Controller
     {
         $category_id = isset($request->category_id) ? $request->category_id : null;
         if ($category_id) {
-            $articles = $this->commonArticle()->where('category_id', $category_id)->orderByDesc('id')->paginate(10);
+            $articles = $this->commonArticle()->whereHas('category', function ($q) use ($category_id) {
+                $q->where('id', $category_id);
+            })->orderByDesc('id')->paginate(10);
         } else {
             $articles = $this->commonArticle()->orderByDesc('id')->paginate(10);
         }
@@ -160,6 +160,14 @@ class ArticleController extends Controller
     public function store(ArticleRequest $request)
     {
         $validated = $request->validated();
+        $categories = explode(',', $request->input('category_id'));
+        $validator = Validator::make(['category_id' => $categories], [
+            'category_id.*' => 'exists:categories,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+        unset($validated['category_id']);
         // $image = isset($validated['media']) ? $validated['media'] : null;
         // if ($image) {
         //     $validated['media'] = $image->store('public/storage/article');
@@ -176,39 +184,12 @@ class ArticleController extends Controller
         //     }
         // }
         $article = Article::create($validated);
-        $fcmTokens = User::whereNotNull('device_token')->pluck('device_token')->toArray();
-        $data = [
-            'to' => '/topics/broadcast-all',
-            "notification" => [
-                "title" => $request->title,
-                "body" => $article,
-            ],
-        ];
-
-        // $encodedData = json_encode($data);
-        // $apiKey = env('FIREBASE_API_KEY');
-        $serverKey = env('FIREBASE_SERVER_KEY');
-        $headers = array(
-            'Authorization: key=' . $serverKey,
-            'Content-Type: application/json',
-        );
-        $this->curl_data('https://fcm.googleapis.com/fcm/send', $data, $headers);
-        // $ch = curl_init();
-        // curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-        // curl_setopt($ch, CURLOPT_POST, true);
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        // curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
-        // $result = curl_exec($ch);
-        // curl_close($ch);
-
+        $article->category()->attach($categories);
+        dispatch(new ArticleCreateFirebaseJob($article));
         ArticleNotification::create([
             'article_id' => $article->id,
         ]);
-
-        Notification::send(null, new SendPushNotification($request->title, $article, $fcmTokens));
+        // Notification::send(null, new SendPushNotification($request->title, $article, $fcmTokens));
         Mail::to(config('mail.from.address'))->send(new ArticleCreateAdminMail($article));
 
         return $this->sendResponse($article->id, 'Article Created Successfully.');
@@ -244,6 +225,17 @@ class ArticleController extends Controller
             return $this->sendError([], 'Record Not Found.');
         }
         $validated = $request->validated();
+        if ($category_id = $request->category_id) {
+            $categories = explode(',', $category_id);
+            $validator = Validator::make(['category_id' => $categories], [
+                'category_id.*' => 'exists:categories,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            $article->category()->sync($categories);
+        }
+        unset($validated['category_id']);
 
         // $image = isset($validated['media']) ? $validated['media'] : null;
         // $oldMedia = isset($article->media) ? $article->media : null;

@@ -193,11 +193,11 @@
 
                 $(".switch").change(function() {
                     var id = $(this).attr("data-value");
-                    var state = 'In-Progress';
+                    var state = 'In-Review';
                     if ($(this).prop("checked") == true) {
                         state = 'Approved';
                     } else if ($(this).prop("checked") == false) {
-                        state = 'In-Progress';
+                        state = 'In-Review';
                     }
                     var url = "{{ URL::to('article') }}";
                     url = url + "/" + id + "/" + state;
@@ -208,7 +208,7 @@
                             if (state == 'Approved') {
                                 toastr.success('Article has been Approved', 'Activated');
                             } else {
-                                toastr.error('Article has been In-Progress', 'Deactivated');
+                                toastr.error('Article has been In-Review', 'Deactivated');
                             }
                         } else {
                             toastr.error('Something went wrong..', 'Error');
@@ -267,7 +267,7 @@
                                     {{--  <th>Media</th>  --}}
                                     <th>Total Likes</th>
                                     <th>Total Shares</th>
-                                    <th>Status</th>
+                                    <th>Status<br><small style="font-size: 70%;">(On=Approved,Off=In-Review)</small></th>
                                     <th>Created At</th>
                                     {{--  <th>Active</th>  --}}
                                 </tr>

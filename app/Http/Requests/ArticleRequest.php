@@ -25,7 +25,7 @@ class ArticleRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'title' => 'required|string',
+            // 'title' => 'required|string',
             'link' => 'nullable|string',
             'tags' => 'nullable|string|min:3',
             'description' => 'nullable|string|min:3',
@@ -36,10 +36,13 @@ class ArticleRequest extends FormRequest
             'thumbnail' => 'nullable|string',
             'status' => 'nullable|in:In-Review,Approved,Rejected',
         ];
-        if ($this->is('article')) {
-            $rules['category_id'] = ['required', Rule::exists('categories', 'id')->whereNull('deleted_at')];
+        if ($this->is('api/article')) {
+            $rules['category_id'] = 'required|string';
+            $rules['title'] = 'required|string';
+            // $rules['category_id'] = ['required', Rule::exists('categories', 'id')->whereNull('deleted_at')];
         } else {
-            $rules['category_id'] = ['nullable', Rule::exists('categories', 'id')->whereNull('deleted_at')];
+            $rules['title'] = 'nullable|string';
+            $rules['category_id'] = 'nullable|string';
         }
         return $rules;
     }

@@ -67,6 +67,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('setting', SettingController::class);
 
     Route::get('article/{id}/{status}', [ArticleController::class, 'status'])->name('admin.article.status');
+    
     Route::get('advertise/ad_status/{id}/{ad_status}', [AdvertiseController::class, 'adStatus'])->name('admin.advertise.ad_status');
     Route::get('advertise/status/{id}/{status}', [AdvertiseController::class, 'status'])->name('admin.advertise.status');
 
