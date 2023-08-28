@@ -45,11 +45,11 @@
                                         <label class="col-lg-3 control-label" for="category_id">Select Category Of
                                             Article:</label>
                                         <div class="col-lg-9">
-                                            <select class="select" name="category_id" id="category_id">
+                                            <select class="select" name="category_id[]" id="category_id" multiple>
                                                 <option value="">Select Category</option>
                                                 @foreach ($categoryList as $category)
                                                     <option value="{{ $category->id }}"
-                                                        {{ old('category_id',$article->category_id) == $category->id ? 'selected' : null }}>
+                                                        {{ is_array($article->category->pluck('id')->toArray()) && in_array($category->id, $article->category->pluck('id')->toArray()) ? 'selected' : null }}>
                                                         {{ $category->name }}</option>
                                                 @endforeach
                                             </select>

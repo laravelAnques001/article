@@ -42,10 +42,13 @@
                                         <label class="col-lg-3 control-label" for="category_id">Select Category Of
                                             Article:</label>
                                         <div class="col-lg-9">
-                                            <select class="select" name="category_id" id="category_id">
+                                            <select class="select js-example-placeholder-multiple" name="category_id[]"
+                                                id="category_id" multiple="multiple">
                                                 <option value="">Select Category</option>
                                                 @foreach ($categoryList as $category)
-                                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
+                                                    <option value="{{ $category->id }}"
+                                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                        {{ $category->name }}</option>
                                                 @endforeach
                                             </select>
                                             @error('category_id')
@@ -137,10 +140,11 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="description">Article Description:</label>
+                                        <label class="col-lg-3 control-label" for="description">Article
+                                            Description:</label>
                                         <div class="col-lg-9">
                                             <textarea rows="2" cols="5" class="form-control" name="description" id="description"
-                                                value="{{ old('description') }}" placeholder="Enter Article Description">{{old('description')}}</textarea>
+                                                value="{{ old('description') }}" placeholder="Enter Article Description">{{ old('description') }}</textarea>
                                             @error('description')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
@@ -165,3 +169,10 @@
         <!-- /content area -->
     </div>
 @endsection
+@push('custom-scripts')
+    <script>
+        $('.js-example-placeholder-multiple').select2({
+            placeholder: "Select Category"
+        });
+    </script>
+@endpush

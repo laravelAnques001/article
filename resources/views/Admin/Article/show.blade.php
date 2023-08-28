@@ -27,7 +27,6 @@
             <!-- Horizontal form options -->
             <div class="row">
                 <div class="col-md-12">
-
                     <!-- Article Information-->
                     <div class="form-horizontal">
                         <div class="panel panel-flat">
@@ -38,7 +37,9 @@
                                 <div class="form-group">
                                     <label class="col-lg-3 control-label">Select Category:</label>
                                     <div class="col-lg-9">
-                                        <p class="form-control">{{ $article->category->name ?? '' }}</p>
+                                        <p class="form-control">
+                                            {{ implode(', ', $article->category->pluck('name')->toArray()) }}
+                                        </p>
                                     </div>
                                 </div>
 
@@ -74,12 +75,12 @@
                                     <label class="col-lg-3 control-label">Article Media Type:</label>
                                     <div class="col-lg-9">
                                         <p class="form-control">
-                                            @if($article->image_type == 0)
-                                            Image
+                                            @if ($article->image_type == 0)
+                                                Image
                                             @elseif($article->image_type == 1)
-                                            Video
+                                                Video
                                             @elseif($article->image_type == 2)
-                                            Youtube Link
+                                                Youtube Link
                                             @endif
                                         </p>
                                     </div>
@@ -89,13 +90,21 @@
                                     <label class="col-lg-3 control-label">Article Media:</label>
                                     <div class="col-lg-9">
                                         @if ($article->image_type == 0)
-                                            <img src="{{ $article->media }}" alt="Article Media"
-                                                width="100" height="100">
+                                            <img src="{{ $article->media }}" alt="Article Media" width="100"
+                                                height="100">
                                         @elseif ($article->image_type == 1)
                                             <video width="150" height="150" controls>
                                                 <source src="{{ $article->thumbnail }}" type="">
                                             </video>
                                         @endif
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">Article Web Link:</label>
+                                    <div class="col-lg-9">
+                                        <a href="{{ $article->web_link }}"
+                                            class="form-control">{{ $article->web_link }}</a>
                                     </div>
                                 </div>
 

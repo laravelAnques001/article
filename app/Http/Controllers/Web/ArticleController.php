@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Web;
 use App\Common\AzureComponent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticleWebRequest;
+use App\Jobs\ArticleCreateFirebaseJob;
 use App\Mail\ArticleApprovedUserMail;
 use App\Models\Article;
+use App\Models\ArticleNotification;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
 class ArticleController extends Controller
@@ -50,38 +53,24 @@ class ArticleController extends Controller
     public function store(ArticleWebRequest $request)
     {
         $validated = $request->validated();
+        Validator::make(['category_id' => $request->category_id], [
+            'category_id.*' => 'exists:categories,id',
+        ]);
         if ($image = $request->media) {
             // $validated['media'] = $image->store('public/article');
             $azure = new AzureComponent();
             $mediaName = $azure->store($image);
             $validated['media'] = config('app.azure') . "/uploads/readwave/$mediaName";
         }
+        unset($validated['category_id']);
         $article = Article::create($validated);
-        $data = [
-            'to' => '/topics/broadcast-all',
-            "notification" => [
-                "title" => $request->title,
-                "body" => $request->description,
-            ],
-        ];
+        $article->category()->attach($request->category_id);
 
-        $encodedData = json_encode($data);
-        $apiKey = env('FIREBASE_API_KEY');
-        $headers = array(
-            'Authorization: key=' . $apiKey,
-            'Content-Type: application/json',
-        );
+        dispatch(new ArticleCreateFirebaseJob($article));
 
-        // $ch = curl_init();
-        // curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-        // curl_setopt($ch, CURLOPT_POST, true);
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        // curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
-        // $result = curl_exec($ch);
-        // curl_close($ch);
+        ArticleNotification::create([
+            'article_id' => $article->id,
+        ]);
 
         return redirect()->route('article.index')->with('success', 'Article Created SuccessFully.');
     }
@@ -94,7 +83,7 @@ class ArticleController extends Controller
      */
     public function show($id)
     {
-        $article = Article::find(base64_decode($id)) ?? abort(404);
+        $article = Article::with('category')->find(base64_decode($id)) ?? abort(404);
         return view('Admin.Article.show', compact('article'));
     }
 
@@ -106,7 +95,8 @@ class ArticleController extends Controller
      */
     public function edit($id)
     {
-        $article = Article::find(base64_decode($id)) ?? abort(404);
+        $article = Article::with('category')
+            ->find(base64_decode($id)) ?? abort(404);
         $categoryList = Category::whereNull('deleted_at')->get();
         return view('Admin.Article.edit', compact('article', 'categoryList'));
     }
@@ -123,6 +113,9 @@ class ArticleController extends Controller
         $article = Article::with('user')->find(base64_decode($id)) ?? abort(404);
 
         $validated = $request->validated();
+        Validator::make(['category_id' => $request->category_id], [
+            'category_id.*' => 'exists:categories,id',
+        ]);
         if ($image = $validated['media'] ?? null) {
             $azure = new AzureComponent();
             $urlString = config('app.azure') . "/uploads/readwave/";
@@ -138,7 +131,9 @@ class ArticleController extends Controller
             $validated['media'] = $urlString . $mediaName;
             // $validated['media'] = $image->store('public/article');
         }
+        unset($validated['category_id']);
         $article->fill($validated)->save();
+        $article->category()->sync($request->category_id);
 
         $status = isset($request->status) ? $request->status : null;
         $email = isset($article->user->email) ? $article->user->email : null;
@@ -191,9 +186,9 @@ class ArticleController extends Controller
                 if ($categories) {
                     $category_name = [];
                     foreach ($categories as $category) {
-                        $category_name[]= $category->name;
+                        $category_name[] = $category->name;
                     }
-                    return join(", ",$category_name);
+                    return join(", ", $category_name);
                 }
                 return;
             })
@@ -222,7 +217,7 @@ class ArticleController extends Controller
                     }
                 }
                 return;
-            })->rawColumns(['date', 'action', 'category_name', 'image', 'link', 'active', 'user_id','status'])
+            })->rawColumns(['date', 'action', 'category_name', 'image', 'link', 'active', 'user_id', 'status'])
             ->addIndexColumn()
             ->toJson();
     }
