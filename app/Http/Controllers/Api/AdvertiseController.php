@@ -145,63 +145,7 @@ class AdvertiseController extends Controller
         $latitude = isset($request->latitude) ? $request->latitude : null;
         $longitude = isset($request->longitude) ? $request->longitude : null;
 
-        // $haversine = "(6371 * acos(cos(radians($latitude))* cos(radians(`latitude`))* cos(radians(`longitude`) - radians($longitude))+ sin(radians($latitude)) * sin(radians(`latitude`))))";
-
-        // return Advertise::with('advertiseLatLong')->whereHas('advertiseLatLong' , function($q) use($haversine){
-        //     $q->selectRaw("$haversine AS distance")
-        //     ->having("distance", "<=", 25);
-        // })->inRandomOrder()->first();
-
-        // $nearbyLocationNames = Redis::georadius('locations', $longitude, $latitude, 25, 'km');
-        // return $nearbyLocationNames;
-        // $showResult = DB::table("advertise_lat_longs")
-        //     ->select(DB::raw("6371 * acos(cos(radians(" . $latitude . "))
-        //     * cos(radians(advertise_lat_longs.lat))
-        //     * cos(radians(advertise_lat_longs.lon) - radians(" . $longitude . "))
-        //     + sin(radians(" . $latitude . "))
-        //     * sin(radians(advertise_lat_longs.lat))) AS distance"))
-        //     ->get();
-        // return $showResult;
-
-        // $query = "SELECT *, (6371 * acos (cos (radians(:target_latitude))* cos(radians(latitude))* cos( radians(:target_latitude) - radians(longitude) )+ sin (radians(:target_latitude) )* sin(radians(latitude)))) AS distance FROM advertise_lat_longs HAVING distance <= 25";
-
-        // $query = "SELECT *,6371 * ACOS(COS(RADIANS(latitude)) * COS(RADIANS(:target_latitude)) * COS(RADIANS(:target_longitude) - RADIANS(longitude)) + SIN(RADIANS(latitude)) * SIN(RADIANS(:target_latitude))) AS distance FROM advertise_lat_longs";
-
-        // $bindings = [
-        //     'target_latitude' => $latitude,
-        //     'target_longitude' => $longitude,
-        // ];
-        // return DB::query($query, $bindings);
-
-        // $radius = 400;
-        // return AdvertiseLatLong::selectRaw("latitude, longitude,
-        // ( 6371000  acos( cos( radians(?) )
-        //   cos( radians( latitude ) )
-        //   * cos( radians( longitude ) - radians(?)
-        //   ) + sin( radians(?) ) *
-        //   sin( radians( latitude ) ) )
-        // ) AS distance", [$latitude, $longitude, $latitude])
-        //     ->having("distance", "<", $radius)
-        //     ->orderBy("distance", 'asc')
-        //     ->offset(0)
-        //     ->limit(20)
-        //     ->get();
-
-        // return $results;
-
-        // return DB::query($query);
-        // return DB::table('advertise_lat_longs')
-        //     ->select('*', DB::raw("6371 * acos(cos(radians(" . $latitude . "))
-        // * cos(radians(latitude))
-        // * cos(radians(longitude) - radians(" . $longitude . "))
-        // + sin(radians(" . $latitude . "))
-        // * sin(radians(latitude))) AS distance"))
-        // // ->join('advertises','advertises.id','=','advertise_lat_longs.advertise_id')
-        //     ->havingRaw('distance <= 25')
-        //     ->toSql();
-
         $advertise = $this->AdvertiseSingleRecordGet($latitude, $longitude);
-        // return $advertise;
         $article = null;
         if ($advertise) {
             $article = Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression', 'share')
@@ -213,7 +157,9 @@ class AdvertiseController extends Controller
 
                 }])->whereNull('deleted_at')->find($advertise->article_id);
             if ($advertise->target == 1) {
-                $today_charges = Transaction::where('article_id', $advertise->article_id)->where('created_at', '>=', Carbon::today())->sum('charge');
+                $click_charge = Transaction::where('article_id', $advertise->article_id)->where('created_at', '>=', Carbon::today())->sum('click_charge');
+                $impression_charge = Transaction::where('article_id', $advertise->article_id)->where('created_at', '>=', Carbon::today())->sum('impression_charge');
+                $today_charges = $click_charge + $impression_charge;
                 if ($today_charges >= $advertise->budget || $article->user->balance < 0) {
                     $article = null;
                 }
@@ -227,27 +173,34 @@ class AdvertiseController extends Controller
         return $this->sendResponse($article, 'Advertise Record Get Successfully.');
     }
 
-    public function AdvertiseSingleRecordGet($lat = null, $log = null)
+    public function AdvertiseSingleRecordGet($lat = null, $long = null)
     {
         $advertise = null;
-        if ($lat && $log) {
-            // $advertise = DB::table('advertises')
-            //     ->select('id', 'article_id', 'target', 'budget', 'start_date', 'end_date', 'status', DB::raw("6371 * acos(cos(radians(" . $lat . "))
-            //     * cos(radians(advertises.latitude))
-            //     * cos(radians(advertises.longitude) - radians(" . $log . "))
-            //     + sin(radians(" . $lat . "))
-            //     * sin(radians(advertises.latitude))) AS distance"))
-            //     ->havingRaw('distance < 25')
-            //     ->where('start_date', '<=', now())
-            // // ->orWhereNull('end_date')
-            //     ->orWhereNotNull('end_date', '>=', now())
-            //     ->whereRaw('status', 'Published')
-            //     ->whereRaw('ad_status', 0)
-            //     ->whereNull('deleted_at')
-            //     ->inRandomOrder()
-            //     ->first();
+        if ($lat && $long) {
+            $latLong = DB::table("advertise_lat_longs")
+                ->select(DB::raw("6371 * acos(cos(radians(" . $lat . "))
+            * cos(radians(advertise_lat_longs.latitude))
+            * cos(radians(advertise_lat_longs.longitude) - radians(" . $long . "))
+            + sin(radians(" . $lat . "))
+            * sin(radians(advertise_lat_longs.latitude))) AS distance,advertise_id"))
+                ->having("distance", "<", 40)
+                ->inRandomOrder()
+                ->get();
+
+            $advertiseId = [];
+            foreach ($latLong as $advertise) {
+                if (!in_array($advertise->advertise_id, $advertiseId)) {
+                    $advertiseId[] = $advertise->advertise_id;
+                }
+            }
+            $advertise = Advertise::where('target', 1)
+                ->whereNull('deleted_at')
+                ->whereIn('id', $advertiseId)
+                ->where('status', 'Published')
+                ->where('ad_status', 0)
+                ->inRandomOrder()
+                ->first();
         }
-        // return $advertise;
         if (is_null($advertise)) {
             $advertise = Advertise::where('target', 0)
                 ->whereNull('deleted_at')
