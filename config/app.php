@@ -174,6 +174,7 @@ return [
          */
         Yajra\DataTables\DataTablesServiceProvider::class,
         ProtoneMedia\LaravelFFMpeg\Support\ServiceProvider::class,
+        Matthewbdaly\LaravelAzureStorage\AzureStorageServiceProvider::class,
         /*
          * Application Service Providers...
          */
