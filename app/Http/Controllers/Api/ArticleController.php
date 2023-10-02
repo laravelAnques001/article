@@ -29,7 +29,7 @@ class ArticleController extends Controller
         $trending = isset($request->trending) ? $request->trending : null;
 
         $articles = $this->commonArticle()->where('status', 'Approved');
-
+        
         if ($search) {
             $articlesData = $articles->where('title', 'like', '%' . $search . '%')
                 ->orWhere('tags', 'like', '%' . $search . '%')
@@ -95,7 +95,7 @@ class ArticleController extends Controller
     public function commonArticle()
     {
         $userId = auth()->id();
-        $userCategory = CategoryUser::where('user_id', $userId)->pluck('category_id')->toArray();
+        // $userCategory = CategoryUser::where('user_id', $userId)->pluck('category_id')->toArray();
         return Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression', 'share')
             ->with(['user' => function ($q) {
                 $q->select('name', 'email', 'id', 'image');
@@ -307,7 +307,7 @@ class ArticleController extends Controller
 
         $article = Article::find($request->article_id);
         $article->share += $share;
-        $article->impressions += $impressions;
+        $article->impression += $impressions;
         $article->save();
         //article end
 

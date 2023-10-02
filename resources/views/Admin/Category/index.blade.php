@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Category List
+@endsection
 @push('custom-scripts')
     <!-- Theme JS files -->
     <script type="text/javascript" src="{{ asset('assets/js/plugins/tables/datatables/datatables.min.js') }}"></script>
@@ -61,9 +64,9 @@
                     {
                         "data": "name"
                     },
-                    {
+                    {{--  {
                         "data": "parent_name"
-                    },
+                    },  --}}
                     {
                         "data": "image"
                     },
@@ -192,7 +195,7 @@
                 <div class="heading-elements">
                     <div class="heading-btn-group">
                         <a href="{{ route('category.create') }}"
-                            class="btn btn-labeled btn-labeled-right bg-blue heading-btn">Create Category
+                            class="btn btn-labeled-right bg-blue heading-btn">Create Category
                         </a>
                     </div>
                 </div>
@@ -217,7 +220,7 @@
                                     <th>Action</th>
                                     <th>#</th>
                                     <th>Name</th>
-                                    <th>Parent Name</th>
+                                    {{--  <th>Parent Name</th>  --}}
                                     <th>Image</th>
                                     <th>Created At</th>
                                 </tr>

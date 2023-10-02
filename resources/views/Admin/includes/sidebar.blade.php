@@ -8,17 +8,27 @@
                     <li class="{{ Route::currentRouteName() == 'catagory.*' ? 'active' : '' }}"><a
                             href="{{ route('dashboard') }}"><i class="icon-home4"></i> <span>DashBoard</span></a>
                     </li>
-                    <li class="{{ Route::currentRouteName() == 'catagory.*' ? 'active' : '' }}"><a
-                            href="{{ route('category.index') }}"><i class="fa fa-list-alt"></i> <span>Category</span></a>
-                    </li>
-                    <li class="{{ Route::currentRouteName() == 'article.*' ? 'active' : '' }}"><a
-                            href="{{ route('article.index') }}"><i class="fa fa-newspaper-o"></i>
-                            <span>Article</span></a>
-                    </li>
-                    <li class="{{ Route::currentRouteName() == 'advertise.*' ? 'active' : '' }}"><a
-                            href="{{ route('advertise.index') }}"><i class="icon-users"></i>
-                            <span>Advertise</span></a>
-                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-newspaper-o"></i> <span>Article</span></a>
+                        <ul>
+                            <li class="{{ Route::currentRouteName() == 'catagory.*' ? 'active' : '' }}"><a
+                                    href="{{ route('category.index') }}"><i class="fa fa-list-alt"></i>
+                                    <span>Category</span></a>
+                            </li>
+                            <li class="{{ Route::currentRouteName() == 'article.*' ? 'active' : '' }}"><a
+                                    href="{{ route('article.index') }}"><i class="fa fa-newspaper-o"></i>
+                                    <span>Article-List</span></a>
+                                </li>
+                                <li class="{{ Route::currentRouteName() == 'advertise.*' ? 'active' : '' }}"><a
+                                    href="{{ route('advertise.index') }}"><i class="icon-users"></i>
+                                    <span>Advertise</span></a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="{{ Route::currentRouteName() == 'users.*' ? 'active' : '' }}"><a
+                                href="{{ route('users.index') }}"><i class="icon-user"></i>
+                                <span>User - List</span></a>
+                        </li>
                     {{--  <li class="{{ Route::currentRouteName() == 'wallet.*' ? 'active' : '' }}"><a
                         href="{{ route('polls.index') }}"><i class="icon-people"></i></i></i>
                         <span>Polls</span></a>

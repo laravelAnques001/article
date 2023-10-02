@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Article List
+@endsection
 @push('custom-scripts')
     <!-- Theme JS files -->
     <script type="text/javascript" src="{{ asset('assets/js/plugins/tables/datatables/datatables.min.js') }}"></script>
@@ -236,7 +239,7 @@
                 <div class="heading-elements">
                     <div class="heading-btn-group">
                         <a href="{{ route('article.create') }}"
-                            class="btn btn-labeled btn-labeled-right bg-blue heading-btn">Create Article
+                            class="btn btn-labeled-right bg-blue heading-btn">Create Article
                         </a>
                     </div>
                 </div>

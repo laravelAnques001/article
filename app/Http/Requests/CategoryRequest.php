@@ -26,11 +26,11 @@ class CategoryRequest extends FormRequest
     {
         $rules = [
             // 'parent_id' => ['nullable', Rule::exists('categories', 'id')->where('deleted_at', null)],
-            'parent_id' => 'nullable|exists:categories,id',
+            // 'parent_id' => 'nullable|exists:categories,id',
             'name' => 'required|string|min:3',
             'description' => 'nullable|min:3',
             'image' => 'nullable|image',
-        ];     
+        ];
 
         return $rules;
     }

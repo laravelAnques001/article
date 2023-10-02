@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Wallet List
+@endsection
 @push('custom-scripts')
     <!-- Theme JS files -->
     <script type="text/javascript" src="{{ asset('assets/js/plugins/tables/datatables/datatables.min.js') }}"></script>
@@ -192,13 +195,13 @@
                 <div class="page-title">
                     <h4><span class="text-semibold">Wallet list</span></h4>
                 </div>
-                <div class="heading-elements">
+                {{--  <div class="heading-elements">
                     <div class="heading-btn-group">
                         <a href="{{ route('wallet.create') }}"
                             class="btn btn-labeled btn-labeled-right bg-blue heading-btn">Create Wallet
                         </a>
                     </div>
-                </div>
+                </div>  --}}
             </div>
             <div class="breadcrumb-line breadcrumb-line-component">
                 <ul class="breadcrumb">

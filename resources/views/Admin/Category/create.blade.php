@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Category Create
+@endsection
 @section('content')
     <!-- Page header -->
     <div class="page-header">
@@ -35,20 +38,21 @@
                         </div>
                         <div class="panel-body">
                             {{--  <form wire:submit.prevent="save">  --}}
-                            <form action="{{ route('category.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('category.store') }}" method="POST" enctype="multipart/form-data"
+                                id="categoryform">
                                 @csrf
                                 <div class="form-group">
                                     <label class="col-lg-3 control-label" for="name">Category Name:</label>
                                     <div class="col-lg-9">
                                         <input type="text" class="form-control" name="name" id="name"
-                                            placeholder="Enter Category Name" value="{{old('name')}}">
+                                            placeholder="Enter Category Name" value="{{ old('name') }}">
                                         @error('name')
                                             <span class="error">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
 
-                                <div class="form-group">
+                                {{--  <div class="form-group">
                                     <label class="col-lg-3 control-label" for="parent_id">Select Parent Category:</label>
                                     <div class="col-lg-9">
                                         <select class="select" name="parent_id" id="parent_id">
@@ -61,12 +65,13 @@
                                             <span class="error">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                </div>
+                                </div>  --}}
 
                                 <div class="form-group">
                                     <label class="col-lg-3 control-label" for="image">Category Image:</label>
                                     <div class="col-lg-9">
-                                        <input type="file" class="file-styled" name="image" id="image" value="{{old('image')}}">
+                                        <input type="file" class="file-styled" name="image" id="image"
+                                            value="{{ old('image') }}">
                                         <span class="help-block">Accepted formats: gif, png, jpg. Max file size 2Mb</span>
                                         @error('image')
                                             <span class="error">{{ $message }}</span>
@@ -91,3 +96,24 @@
     </div>
     <!-- /content area -->
 @endsection
+@push('head_scripts')
+    <script>
+        $(document).ready(function(){
+            $('#categoryform').validate({
+                errorClass: 'error m-error',
+                errorElement: 'small',
+                rules: {
+                    name: {
+                        required: true,
+                    }
+                }
+            });
+
+            $('#categoryform').submit(function() {
+                if ($('#categoryform').valid()) {
+                    $('#categoryform').find('button[type=submit]').prop('disabled', true);
+                }
+            });
+        });
+    </script>
+@endpush

@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Advertise Create
+@endsection
 @section('content')
     <div>
         <!-- Page header -->
@@ -35,7 +38,8 @@
                                 <h5 class="panel-title">Advertise Information</h5>
                             </div>
                             {{--  <form wire:submit.prevent="save">  --}}
-                            <form action="{{ route('advertise.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('advertise.store') }}" method="POST" enctype="multipart/form-data"
+                                id="advertiseForm">
                                 @csrf
                                 <div class="panel-body">
 
@@ -98,32 +102,31 @@
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="end_date">End Date:</label>
                                         <div class="col-lg-9">
-                                            <input type="datetime-local" class="form-control" name="end_date"
-                                                id="end_date" placeholder="Enter Advertise End Date"
-                                                value="{{ old('end_date') }}">
+                                            <input type="datetime-local" class="form-control" name="end_date" id="end_date"
+                                                placeholder="Enter Advertise End Date" value="{{ old('end_date') }}">
                                             @error('end_date')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
+                                    {{--  <div class="form-group">
                                         <label class="col-lg-3 control-label" for="status">Select Status:</label>
                                         <div class="col-lg-9">
                                             <select class="select" name="status" id="status">
                                                 <option value="">Select Status</option>
-                                                <option value="Pending" >Pending</option>
-                                                <option value="Published" selected>Published</option>
+                                                <option value="Pending">Pending</option>
+                                                <option value="Published">Published</option>
                                                 <option value="Rejected">Rejected</option>
                                             </select>
                                             @error('status')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                    </div>
+                                    </div>  --}}
 
                                     <div class="text-right">
-                                        <button type="submit" class="btn btn-primary">Submit form <i
+                                        <button type="submit" class="btn btn-primary">Submit Form <i
                                                 class="icon-arrow-right14 position-right"></i></button>
                                     </div>
                                 </div>
@@ -141,3 +144,43 @@
         <!-- /content area -->
     </div>
 @endsection
+@push('head_scripts')
+    <script>
+        $(document).ready(function() {
+            $('#advertiseForm').validate({
+                errorClass: 'error m-error',
+                errorElement: 'small',
+                rules: {
+                    article_id: {
+                        required: true,
+                    },
+                    target: {
+                        required: true,
+                    },
+                    budget: {
+                        required: true,
+                    },
+
+                },
+                messages: {
+                    article_id: {
+                        required: 'Please select article.',
+                    },
+                    target: {
+                        required: 'Please enter article target.',
+                    },
+                    budget: {
+                        required: 'Please enter article budget.',
+                    },
+
+                }
+            });
+
+            $('#advertiseForm').submit(function() {
+                if ($('#advertiseForm').valid()) {
+                    $('#advertiseForm').find('button[type=submit]').prop('disabled', true);
+                }
+            });
+        });
+    </script>
+@endpush

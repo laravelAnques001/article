@@ -25,16 +25,18 @@ class ArticleWebRequest extends FormRequest
     {
         return [
             'title' => 'required|string',
-            'link' => 'nullable|string',
-            'tags' => 'nullable|string|min:3',
-            'description' => 'nullable|string|min:3',
+            // 'link' => 'required|string',
+            'link' => ['required','regex:/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i'],
+            'tags' => 'required|string|min:3',
+            'description' => 'required|string|min:3',
             'image_type' => 'nullable|in:0,1,2',
             // 'media' => 'nullable|file',
             'media' => 'nullable|file|mimes:jpeg,jpg,png,bmp,gif,svg,mp4,ogx,oga,ogv,ogg,webm,video/*',
             'thumbnail' => 'nullable|string',
             'status' => 'nullable|in:In-Review,Approved,Rejected',
-            'category_id' => ['nullable', Rule::exists('categories', 'id')->whereNull('deleted_at')]
-        ];     
-         
+            'category_id' => 'required|array',
+            'category_id.*' => ['required', Rule::exists('categories', 'id')->whereNull('deleted_at')]
+        ];
+
     }
 }

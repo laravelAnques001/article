@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Dashboard
+@endsection
 @section('content')
     <div class="container">
         <div class="row justify-content-center">

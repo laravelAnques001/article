@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Advertise Show
+@endsection
 @section('content')
     <div>
         <!-- Page header -->

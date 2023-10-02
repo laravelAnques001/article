@@ -5,6 +5,7 @@ use App\Http\Controllers\Web\ArticleController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashBoardController;
+use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Web\PollsController;
 use App\Http\Controllers\Web\SettingController;
 use App\Http\Controllers\Web\WalletController;
@@ -65,6 +66,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('wallet', WalletController::class);
     Route::resource('polls', PollsController::class);
     Route::resource('setting', SettingController::class);
+    Route::resource('users', UserController::class);
 
     Route::get('article/{id}/{status}', [ArticleController::class, 'status'])->name('admin.article.status');
     
@@ -77,5 +79,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('wallet/getData', [WalletController::class, 'getWalletData'])->name('admin.wallet.getData');
     Route::post('polls/getData', [PollsController::class, 'getPollsData'])->name('admin.polls.getData');
     Route::post('setting/getData', [SettingController::class, 'getSettingData'])->name('admin.setting.getData');
-
+    Route::post('users/getData', [UserController::class, 'getUserData'])->name('admin.users.getData');
 });

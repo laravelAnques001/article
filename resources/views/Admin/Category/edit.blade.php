@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Category Update
+@endsection
 @section('content')
     <!-- Page header -->
     <div class="page-header">
@@ -35,7 +38,7 @@
                         <div class="panel-body">
                             {{--  <form wire:submit.prevent="update">  --}}
                             <form action="{{ route('category.update', base64_encode($category->id)) }}" method="POST"
-                                enctype="multipart/form-data">
+                                enctype="multipart/form-data" id="categoryform">
                                 @csrf
                                 @method('PUT')
                                 <div class="form-group">
@@ -49,7 +52,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group">
+                                {{--  <div class="form-group">
                                     <label class="col-lg-3 control-label" for="parent_id">Select Patent Category:</label>
                                     <div class="col-lg-9">
                                         <select class="select" name="parent_id" id="parent_id">
@@ -65,7 +68,7 @@
                                             <span class="error">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                </div>
+                                </div>  --}}
 
                                 <div class="form-group">
                                     <label class="col-lg-3 control-label" for="image">Category Image:</label>
@@ -96,3 +99,24 @@
     </div>
     <!-- /content area -->
 @endsection
+@push('head_scripts')
+    <script>
+        $(document).ready(function(){
+            $('#categoryform').validate({
+                errorClass: 'error m-error',
+                errorElement: 'small',
+                rules: {
+                    name: {
+                        required: true,
+                    }
+                }
+            });
+
+            $('#categoryform').submit(function() {
+                if ($('#categoryform').valid()) {
+                    $('#categoryform').find('button[type=submit]').prop('disabled', true);
+                }
+            });
+        });
+    </script>
+@endpush

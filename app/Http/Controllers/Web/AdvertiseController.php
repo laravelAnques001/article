@@ -41,6 +41,7 @@ class AdvertiseController extends Controller
     public function store(AdvertiseRequest $request)
     {
         $validated = $request->validated();
+        $validated['status'] = 'Published';
         Advertise::create($validated);
         return redirect()->route('advertise.index')->with('success', 'Advertise Created SuccessFully.');
     }
@@ -122,8 +123,8 @@ class AdvertiseController extends Controller
                 return $data->article->ad_click_count;
             })
             ->addColumn('action', function ($data) {
-                $data = '<a class="font-size-16" href="' . route('advertise.edit', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-edit fa-1x"></i></a>
-                <a class="font-size-16 " href="' . route('advertise.show', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-eye fa-1x"></i></a>
+                $data = '<a class="font-size-16" href="' . route('advertise.edit', base64_encode($data->id)) . '"  title="Edit"><i class="fa fa-edit fa-1x"></i></a>
+                <a class="font-size-16 " href="' . route('advertise.show', base64_encode($data->id)) . '"  title="View"><i class="fa fa-eye fa-1x"></i></a>
                 <a class="delete_row font-size-16" data-value = "' . route('advertise.destroy', base64_encode($data->id)) . '" title = "Delete"><i class="fa fa-trash-o"></i></a>';
                 return $data;
             })

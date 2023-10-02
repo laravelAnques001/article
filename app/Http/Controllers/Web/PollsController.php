@@ -119,8 +119,8 @@ class PollsController extends Controller
 
         return DataTables::of($data)
             ->addColumn('action', function ($data) {
-                $data = '<a class="font-size-16" href="' . route('polls.edit', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-edit fa-1x"></i></a>
-                <a class="font-size-16 " href="' . route('polls.show', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-eye fa-1x"></i></a>
+                $data = '<a class="font-size-16" href="' . route('polls.edit', base64_encode($data->id)) . '"  title="Edit"><i class="fa fa-edit fa-1x"></i></a>
+                <a class="font-size-16 " href="' . route('polls.show', base64_encode($data->id)) . '"  title="View"><i class="fa fa-eye fa-1x"></i></a>
                 <a class="delete_row font-size-16" data-value = "' . route('polls.destroy', base64_encode($data->id)) . '" title = "Delete"><i class="fa fa-trash-o"></i></a>';
                 return $data;
             })

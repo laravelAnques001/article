@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Article Show
+@endsection
 @section('content')
     <div>
         <!-- Page header -->
@@ -103,8 +106,8 @@
                                 <div class="form-group">
                                     <label class="col-lg-3 control-label">Article Web Link:</label>
                                     <div class="col-lg-9">
-                                        <a href="{{ $article->web_link }}"
-                                            class="form-control">{{ $article->web_link }}</a>
+                                        <a href="{{ $article->web_link }}" class="form-control"
+                                            target="_blank">{{ $article->web_link }}</a>
                                     </div>
                                 </div>
 

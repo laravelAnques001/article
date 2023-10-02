@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Advertise Update
+@endsection
 @section('content')
     @php
         $start_date = date('Y-m-d\TH:i', strtotime($advertise->start_date));

@@ -40,15 +40,6 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
-        // $validator = Validator::make($request->all(),[
-        //     'parent_id' => 'nullable|exists:categories,id',
-        //     'name' => 'required|string|min:3',
-        //     'description' => 'nullable|min:3',
-        //     'image' => 'nullable|image',
-        // ]);
-        // if ($validator->fails()) {
-        //     return redirect()->route('category.index')->withErrors($validator)->withInput();
-        // }
         $validated = $request->validated();
         if ($request->hasFile('image')) {
             // $validated['image'] = $request->image->store('public/category');
@@ -80,8 +71,8 @@ class CategoryController extends Controller
     public function edit($id)
     {
         $category = Category::find(base64_decode($id)) ?? abort(404);
-        $categoryList = Category::with('parent')->whereNull('deleted_at')->get();
-        return view('Admin.Category.edit', compact('category', 'categoryList'));
+        // $categoryList = Category::with('parent')->whereNull('deleted_at')->get();
+        return view('Admin.Category.edit', compact('category'));
     }
 
     /**
@@ -99,13 +90,8 @@ class CategoryController extends Controller
             $azure = new AzureComponent();
             $oldImage = isset($category->image) ? $category->image : null;
             if ($oldImage) {
-                // $fileCheck = storage_path('app/' . $oldImage);
-                // if (file_exists($fileCheck)) {
-                //     unlink($fileCheck);
                 $azure->delete($oldImage);
             }
-            // }
-            // $validated['image'] = $image->store('public/category');
             $validated['image'] = $azure->store($image);
         }
         $category->fill($validated)->save();
@@ -131,20 +117,17 @@ class CategoryController extends Controller
 
     public function getCategoryData()
     {
-        $data = Category::with('parent')->whereNull('deleted_at')->orderBy('id', 'desc');
+        $data = Category::whereNull('deleted_at')->orderBy('id', 'desc');
 
         return DataTables::of($data)
             ->addColumn('action', function ($data) {
-                $data = '<a class="font-size-16" href="' . route('category.edit', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-edit fa-1x"></i></a>
-                <a class="font-size-16 " href="' . route('category.show', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-eye fa-1x"></i></a>
+                $data = '<a class="font-size-16" href="' . route('category.edit', base64_encode($data->id)) . '"  title="Edit"><i class="fa fa-edit fa-1x"></i></a>
+                <a class="font-size-16 " href="' . route('category.show', base64_encode($data->id)) . '"  title="View"><i class="fa fa-eye fa-1x"></i></a>
                 <a class="delete_row font-size-16" data-value = "' . route('category.destroy', base64_encode($data->id)) . '" title = "Delete"><i class="fa fa-trash-o"></i></a>';
                 return $data;
             })
             ->addColumn('date', function ($data) {
                 return date('Y-m-d H:i:s', strtotime($data->created_at));
-            })
-            ->addColumn('parent_name', function ($data) {
-                return $data->parent->name ?? '';
             })
             ->editColumn('image', function ($data) {
                 if ($data->image_url) {
@@ -153,7 +136,7 @@ class CategoryController extends Controller
                     return;
                 }
             })
-            ->rawColumns(['date', 'action', 'parent_name', 'image'])
+            ->rawColumns(['date', 'action', 'image'])
             ->addIndexColumn()
             ->toJson();
     }

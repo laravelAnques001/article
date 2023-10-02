@@ -53,9 +53,6 @@ class ArticleController extends Controller
     public function store(ArticleWebRequest $request)
     {
         $validated = $request->validated();
-        Validator::make(['category_id' => $request->category_id], [
-            'category_id.*' => 'exists:categories,id',
-        ]);
         if ($image = $request->media) {
             // $validated['media'] = $image->store('public/article');
             $azure = new AzureComponent();
@@ -63,6 +60,7 @@ class ArticleController extends Controller
             $validated['media'] = config('app.azure') . "/uploads/readwave/$mediaName";
         }
         unset($validated['category_id']);
+        $validated['status'] = 'Approved';
         $article = Article::create($validated);
         $article->category()->attach($request->category_id);
 
@@ -173,8 +171,8 @@ class ArticleController extends Controller
                 return '<input type="checkbox" id="switcherySize2"  data-value="' . base64_encode($data->id) . '"  class="switchery switch" data-size="sm" ' . $checked . '  />';
             })
             ->addColumn('action', function ($data) {
-                $data = '<a class="font-size-16" href="' . route('article.edit', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-edit fa-1x"></i></a>
-                <a class="font-size-16 " href="' . route('article.show', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-eye fa-1x"></i></a>
+                $data = '<a class="font-size-16" href="' . route('article.edit', base64_encode($data->id)) . '"  title="Edit"><i class="fa fa-edit fa-1x"></i></a>
+                <a class="font-size-16 " href="' . route('article.show', base64_encode($data->id)) . '"  title="View"><i class="fa fa-eye fa-1x"></i></a>
                 <a class="delete_row font-size-16" data-value = "' . route('article.destroy', base64_encode($data->id)) . '" title = "Delete"><i class="fa fa-trash-o"></i></a>';
                 return $data;
             })
@@ -210,7 +208,6 @@ class ArticleController extends Controller
                     if ($data->media_url) {
                         return '<img src="' . $data->media_url . '" alt="Article Image" width="60" height="60" class="img-thumbnail">';
                     }
-
                 } elseif ($data->image_type == 1) {
                     if ($data->thumbnail_url) {
                         return '<img src="' . $data->thumbnail_url . '" alt="Article Image" width="60" height="60" class="img-thumbnail">';

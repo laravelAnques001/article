@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Article Create
+@endsection
 @section('content')
     <div>
         <!-- Page header -->
@@ -35,15 +38,16 @@
                                 <h5 class="panel-title">Article Information</h5>
                             </div>
                             {{--  <form wire:submit.prevent="save">  --}}
-                            <form action="{{ route('article.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('article.store') }}" method="POST" enctype="multipart/form-data"
+                                id="articleForm">
                                 @csrf
                                 <div class="panel-body">
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="category_id">Select Category Of
                                             Article:</label>
                                         <div class="col-lg-9">
-                                            <select class="select js-example-placeholder-multiple" name="category_id[]"
-                                                id="category_id" multiple="multiple">
+                                            <select class="select js-example-placeholder-multiple border-2 form-control"
+                                                name="category_id[]" id="category_id" multiple>
                                                 <option value="">Select Category</option>
                                                 @foreach ($categoryList as $category)
                                                     <option value="{{ $category->id }}"
@@ -80,7 +84,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="col-lg-3 control-label" for="'tags">Article Tags:</label>
+                                        <label class="col-lg-3 control-label" for="tags">Article Tags:</label>
                                         <div class="col-lg-9">
                                             <input type="text" class="form-control" name="tags" id="tags"
                                                 placeholder="Enter Article Tags" value="{{ old('tags') }}">
@@ -107,7 +111,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
+                                    {{--  <div class="form-group">
                                         <label class="col-lg-3 control-label" for="status">Select Article Status:</label>
                                         <div class="col-lg-9">
                                             <select class="select" name="status" id="status">
@@ -126,7 +130,7 @@
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                    </div>
+                                    </div>  --}}
 
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="media">Article Media:</label>
@@ -169,10 +173,69 @@
         <!-- /content area -->
     </div>
 @endsection
-@push('custom-scripts')
+@push('head_scripts')
     <script>
         $('.js-example-placeholder-multiple').select2({
             placeholder: "Select Category"
+        });
+
+        $(document).ready(function() {
+            $('#articleForm').validate({
+                errorClass: 'error m-error',
+                errorElement: 'small',
+                rules: {
+                    'category_id[]': {
+                        required: true,
+                    },
+                    title: {
+                        required: true,
+                    },
+                    link: {
+                        required: true,
+                    },
+                    tags: {
+                        required: true,
+                    },
+                    image_type: {
+                        required: true,
+                    },
+                    media: {
+                        required: true,
+                    },
+                    description: {
+                        required: true,
+                    },
+                },
+                messages: {
+                    'category_id[]': {
+                        required: 'Please select at least 1 category.',
+                    },
+                    title: {
+                        required: 'Please enter article title.',
+                    },
+                    link: {
+                        required: 'Please enter article link.',
+                    },
+                    tags: {
+                        required: 'Please enter article tags.',
+                    },
+                    image_type: {
+                        required: 'Please enter article image type.',
+                    },
+                    media: {
+                        required: 'Please enter article media.',
+                    },
+                    description: {
+                        required: 'Please enter article description.',
+                    },
+                }
+            });
+
+            $('#articleForm').submit(function() {
+                if ($('#articleForm').valid()) {
+                    $('#articleForm').find('button[type=submit]').prop('disabled', true);
+                }
+            });
         });
     </script>
 @endpush

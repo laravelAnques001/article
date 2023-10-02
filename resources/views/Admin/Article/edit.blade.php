@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Article Update
+@endsection
 @section('content')
     <div>
         <!-- Page header -->
@@ -37,7 +40,7 @@
 
                             {{--  <form wire:submit.prevent="update">  --}}
                             <form action="{{ route('article.update', base64_encode($article->id)) }}" method="POST"
-                                enctype="multipart/form-data">
+                                enctype="multipart/form-data" id="articleForm">
                                 @csrf
                                 @method('PUT')
                                 <div class="panel-body">
@@ -185,3 +188,65 @@
         <!-- /content area -->
     </div>
 @endsection
+@push('head_scripts')
+    <script>
+        $('.js-example-placeholder-multiple').select2({
+            placeholder: "Select Category"
+        });
+
+        $(document).ready(function() {
+            $('#articleForm').validate({
+                errorClass: 'error m-error',
+                errorElement: 'small',
+                rules: {
+                    'category_id[]': {
+                        required: true,
+                    },
+                    title: {
+                        required: true,
+                    },
+                    link: {
+                        required: true,
+                        url: true,
+                    },
+                    tags: {
+                        required: true,
+                    },
+                    image_type: {
+                        required: true,
+                    },
+                    description: {
+                        required: true,
+                    },
+                },
+                messages:{
+                    'category_id[]': {
+                        required: 'Please select at least 1 category.',
+                    },
+                    title: {
+                        required: 'Please enter article title.',
+                    },
+                    link: {
+                        required: 'Please enter article link.',
+                        url: 'Please valid article link.',
+                    },
+                    tags: {
+                        required: 'Please enter article tags.',
+                    },
+                    image_type: {
+                        required: 'Please enter article image type.',
+                    },
+                    description: {
+                        required: 'Please enter article description.',
+                    },
+                }
+            });
+
+            $('#articleForm').submit(function() {
+                if ($('#articleForm').valid()) {
+                    $('#articleForm').find('button[type=submit]').prop('disabled', true);
+                }
+            });
+        });
+    </script>
+@endpush

@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Setting Create
+@endsection
 @section('content')
     <div>
         <!-- Page header -->
@@ -53,7 +56,9 @@
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="value">Value:</label>
                                         <div class="col-lg-9">
-                                            <textarea class="ckeditor form-control" name="value" placeholder="Enter Value"></textarea>
+                                            {{--  <textarea class="ckeditor form-control" name="value" placeholder="Enter Value"></textarea>  --}}
+                                            <input type="text" class="form-control" name="value" id="value"
+                                                placeholder="Enter value" value="{{ old('value') }}">
                                             @error('value')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror

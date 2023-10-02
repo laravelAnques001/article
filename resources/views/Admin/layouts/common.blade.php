@@ -6,10 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--<link rel="icon" type="image/png" sizes="16x16" href="#"/>-->
-    <link href="{{ asset('assets/images/logo.png') }}" sizes="128x128" rel="shortcut icon" />
-    <title>@yield('title')</title>
+    <link href="{{ asset('assets/images/logo.jpg') }}" sizes="128x128" rel="shortcut icon" />
+    <title> @yield('title') </title>
     @include('Admin.includes.head_script')
-
+    @stack('head_scripts')
 </head>
 
 <body>

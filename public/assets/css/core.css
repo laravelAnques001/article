@@ -3591,7 +3591,7 @@ select[multiple].input-group-xs > .input-group-btn > .btn {
   .sidebar-xs .header-highlight .navbar-header .navbar-brand {
     padding-left: 0;
     padding-right: 0;
-    background: url(../images/logo.png) no-repeat center center;
+    background: url(../images/logo.jpg) no-repeat center center;
     background-size: auto 16px;
     float: none;
     display: block;

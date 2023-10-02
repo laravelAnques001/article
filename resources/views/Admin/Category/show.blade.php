@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Category show
+@endsection
 @section('content')
     <!-- Page header -->
     <div class="page-header">
@@ -41,14 +44,14 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            {{--  <div class="form-group">
                                 <label class="col-lg-3 control-label">Category Parent Id:</label>
                                 <div class="col-lg-9">
                                     <div class="col-lg-9">
                                         <p class="col-lg-3">{{ $category->parent->name ?? '' }}</p>
                                     </div>
                                 </div>
-                            </div>
+                            </div>  --}}
 
                             <div class="form-group">
                                 <label class="col-lg-3 control-label">Category Image:</label>

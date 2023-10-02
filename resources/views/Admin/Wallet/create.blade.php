@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Wallet Create
+@endsection
 @section('content')
     <div>
         <!-- Page header -->

@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Setting Update
+@endsection
 @section('content')
     <div>
         <!-- Page header -->
@@ -44,8 +47,9 @@
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="key">Key:</label>
                                         <div class="col-lg-9">
-                                            <input type="text" class="form-control" name="key" id="key"
-                                                placeholder="Enter Key" value="{{ old('key', $setting->key) }}">
+                                            <p>{{ $setting->key }}</p>
+                                            {{--  <input type="text" class="form-control" name="key" id="key"
+                                                placeholder="Enter Key" value="{{ old('key', $setting->key) }}">  --}}
                                             @error('key')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
@@ -55,7 +59,9 @@
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="value">Value:</label>
                                         <div class="col-lg-9">
-                                            <textarea class="ckeditor form-control" name="value">{{ old('value', $setting->value)  }}</textarea>
+                                            {{--  <textarea class="ckeditor form-control" name="value">{{ old('value', $setting->value)  }}</textarea>  --}}
+                                            <input type="text" class="form-control" name="value" id="value"
+                                                placeholder="Enter value" value="{{ old('value', $setting->value) }}">
                                             @error('value')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror

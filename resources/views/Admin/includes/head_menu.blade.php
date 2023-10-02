@@ -2,7 +2,8 @@
 <div class="navbar navbar-default header-highlight">
     <div class="navbar-header navbar-header-color">
         <a class="navbar-brand navbar-brand-header" href="#">
-            <img src="{{ asset('assets/images/readwave_banner.png') }}" alt="">
+            {{--  <img src="{{ asset('assets/images/readwave_banner.png') }}" alt="">  --}}
+            <img src="{{ asset('assets/images/business_banner.png') }}" alt="">
         </a>
 
         <ul class="nav navbar-nav visible-xs-block">
@@ -21,19 +22,21 @@
             <ul class="nav navbar-nav">
                 <li class="dropdown user user-menu nav-hide">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <span class="hidden-xs">My account</span>
+                        <span class="hidden-xs">My Account</span>
                     </a>
                     <ul class="dropdown-menu">
 
-                        <li><a href="{{ route('profile') }}"><i class="icon-user-plus"></i> <span>My profile</span></a>
+                        <li>
+                            <a href="{{ route('profile') }}"><i class="icon-user-plus"></i> <span>My Profile</span></a>
                         </li>
-                        <li><a href="{{ route('resetpassword') }}"><i class="icon-lock2"></i> <span>Change
+                        <li>
+                            <a href="{{ route('resetpassword') }}"><i class="icon-lock2"></i> <span>Change
                                     Password</span></a>
                         </li>
-                        <li><a href="javascript:void(0);" onclick="document.getElementById('logoutuser').submit();"><i
+                        <li>
+                            <a href="javascript:void(0);" onclick="document.getElementById('logoutuser').submit();"><i
                                     class="icon-switch2"></i> <span>Logout</span></a>
                         </li>
-                        </form>
                     </ul>
                     <form action="{{ route('logout') }}" method="post" enctype="multipart/form-data" id="logoutuser">
                         @csrf

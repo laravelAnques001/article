@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-
+use App\Common\AzureComponent;
 class AuthController extends Controller
 {
     public function otpGenerate(Request $request)
@@ -108,13 +108,21 @@ class AuthController extends Controller
         $user = User::find($userId);
 
         if ($image = $request->image ?? null) {
+            // if ($oldImage = $user->image ?? null) {
+            //     $fileCheck = storage_path('app/' . $oldImage);
+            //     if (file_exists($fileCheck)) {
+            //         unlink($fileCheck);
+            //     }
+            // }
+            // $validated['image'] = $image->store('public/user');
+            $azure = new AzureComponent();
+            $urlString = config('app.azure') . "/uploads/readwave/";
             if ($oldImage = $user->image ?? null) {
-                $fileCheck = storage_path('app/' . $oldImage);
-                if (file_exists($fileCheck)) {
-                    unlink($fileCheck);
-                }
+                $oldFileName = str_replace($urlString, '', $oldImage);
+                $azure->delete($oldFileName);
             }
-            $validated['image'] = $image->store('public/user');
+            $mediaName = $azure->store($image);
+            $validated['image'] = $urlString . $mediaName;
         }
 
         $user->fill($validated)->save();

@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Setting List
+    {{ env('APP_NAME') }} | User List
 @endsection
 @push('custom-scripts')
     <!-- Theme JS files -->
@@ -46,7 +46,7 @@
                 "serverSide": true,
                 "select": true,
                 "ajax": {
-                    "url": "{{ route('admin.setting.getData') }}",
+                    "url": "{{ route('admin.users.getData') }}",
                     "dataType": "json",
                     "type": "POST",
                     "data": {
@@ -62,11 +62,21 @@
                         "data": "id"
                     },
                     {
-                        "data": "key"
-                    },
+                        "data": "name"
+                    },                 
                     {
-                        "data": "value"
-                    },
+                        "data": "mobile_number"
+                    },                 
+                    {
+                        "data": "email"
+                    },                 
+                    {
+                        "data": "balance"
+                    },                 
+                    {
+                        "data": "image"
+                    },                 
+                  
                 ]
             });
 
@@ -97,7 +107,7 @@
                                 }).done(function(data) {
                                     swal({
                                         title: "Deleted!",
-                                        text: "Setting key has been successfully deleted..",
+                                        text: "Category has been successfully deleted..",
                                         type: "success",
                                         showCancelButton: true,
                                         closeOnConfirm: false,
@@ -184,19 +194,19 @@
         <div class="page-header">
             <div class="page-header-content">
                 <div class="page-title">
-                    <h4><span class="text-semibold">Setting list</span></h4>
+                    <h4><span class="text-semibold">User list</span></h4>
                 </div>
                 <div class="heading-elements">
                     <div class="heading-btn-group">
-                        <a href="{{ route('setting.create') }}"
-                            class="btn btn-labeled-right bg-blue heading-btn">Create Setting
+                        <a href="{{ route('users.create') }}"
+                            class="btn btn-labeled-right bg-blue heading-btn">Create User
                         </a>
                     </div>
                 </div>
             </div>
             <div class="breadcrumb-line breadcrumb-line-component">
                 <ul class="breadcrumb">
-                    <li>Setting list</li>
+                    <li>Users list</li>
                 </ul>
             </div>
         </div>
@@ -213,8 +223,13 @@
                                 <tr>
                                     <th>Action</th>
                                     <th>#</th>
-                                    <th>key</th>
-                                    <th>Value</th>
+                                    <th>Name</th>
+                                    <th>Mobile No</th>
+                                    <th>Email</th>
+                                    <th>Balance</th>
+                                    <th>Image</th>
+                                    {{--  <th>Image</th>
+                                    <th>Created At</th>  --}}
                                 </tr>
                             </thead>
                         </table>

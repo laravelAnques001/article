@@ -1,4 +1,7 @@
 @extends('Admin.layouts.common')
+@section('title')
+    {{ env('APP_NAME') }} | Advertise List
+@endsection
 @push('custom-scripts')
     <!-- Theme JS files -->
     <script type="text/javascript" src="{{ asset('assets/js/plugins/tables/datatables/datatables.min.js') }}"></script>
@@ -259,7 +262,7 @@
                 <div class="heading-elements">
                     <div class="heading-btn-group">
                         <a href="{{ route('advertise.create') }}"
-                            class="btn btn-labeled btn-labeled-right bg-blue heading-btn">Create Advertise
+                            class="btn btn-labeled-right bg-blue heading-btn">Create Advertise
                         </a>
                     </div>
                 </div>

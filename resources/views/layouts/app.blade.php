@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ env('APP_NAME') }}</title>
-    <link href="{{ asset('assets/images/logo.png') }}" sizes="128x128" rel="shortcut icon" />
+    <link href="{{ asset('assets/images/logo.jpg') }}" sizes="128x128" rel="shortcut icon" />
 
     <!-- Global stylesheets -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900" rel="stylesheet" type="text/css">

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
 class SettingController extends Controller
@@ -39,14 +38,10 @@ class SettingController extends Controller
     public function store(Request $request)
     {
         $input = $request->all();
-        $validated = Validator::make($input, [
-            'key' => 'required|string|min:3',
+        $request->validate([
+            'key' => 'required|string|unique:settings,key',
             'value' => 'nullable|string',
         ]);
-
-        if ($validated->fails()) {
-            return $this->sendError($validated->errors(), 'Validation Error.');
-        }
         Setting::create($input);
         return redirect()->route('setting.index')->with('success', 'Setting Key Created SuccessFully.');
     }
@@ -84,18 +79,13 @@ class SettingController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $input = $request->all();
         $setting = Setting::find(base64_decode($id)) ?? abort(404);
-        $validated = Validator::make($input, [
-            'key' => 'required|string|min:3',
+        $request->validate([
             'value' => 'nullable|string',
         ]);
-
-        if ($validated->fails()) {
-            return $this->sendError($validated->errors(), 'Validation Error.');
-        }
-
-        $setting->fill($input)->save();
+        $setting->update([
+            'value' => $request->value,
+        ]);
         return redirect()->route('setting.index')->with('success', 'Setting Key Updated SuccessFully.');
     }
 
@@ -122,9 +112,9 @@ class SettingController extends Controller
 
         return DataTables::of($data)
             ->addColumn('action', function ($data) {
-                $data = '<a class="font-size-16" href="' . route('setting.edit', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-edit fa-1x"></i></a>
-                <a class="font-size-16 " href="' . route('setting.show', base64_encode($data->id)) . '"  title="Push Notification"><i class="fa fa-eye fa-1x"></i></a>
-                <a class="delete_row font-size-16" data-value = "' . route('setting.destroy', base64_encode($data->id)) . '" title = "Delete"><i class="fa fa-trash-o"></i></a>';
+                $data = '<a class="font-size-16" href="' . route('setting.edit', base64_encode($data->id)) . '"  title="Edit"><i class="fa fa-edit fa-1x"></i></a>';
+                // $data .='<a class="font-size-16 " href="' . route('setting.show', base64_encode($data->id)) . '"  title="View"><i class="fa fa-eye fa-1x"></i></a>
+                // <a class="delete_row font-size-16" data-value = "' . route('setting.destroy', base64_encode($data->id)) . '" title = "Delete"><i class="fa fa-trash-o"></i></a>';
                 return $data;
             })
             ->editColumn('value', function ($data) {
