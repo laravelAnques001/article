@@ -5,9 +5,11 @@ use App\Http\Controllers\Web\ArticleController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashBoardController;
-use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Web\PollsController;
+use App\Http\Controllers\Web\ServiceController;
 use App\Http\Controllers\Web\SettingController;
+use App\Http\Controllers\Web\SubscriptionPlanController;
+use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Web\WalletController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -67,9 +69,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('polls', PollsController::class);
     Route::resource('setting', SettingController::class);
     Route::resource('users', UserController::class);
+    Route::resource('subscriptionPlan', SubscriptionPlanController::class);
+    Route::resource('services', ServiceController::class);
 
     Route::get('article/{id}/{status}', [ArticleController::class, 'status'])->name('admin.article.status');
-    
+    Route::get('services/{id}/{status}', [ServiceController::class, 'status'])->name('admin.services.status');
+    Route::get('subscriptionPlan/{id}/{status}', [SubscriptionPlanController::class, 'status'])->name('admin.subscriptionPlan.status');
+
     Route::get('advertise/ad_status/{id}/{ad_status}', [AdvertiseController::class, 'adStatus'])->name('admin.advertise.ad_status');
     Route::get('advertise/status/{id}/{status}', [AdvertiseController::class, 'status'])->name('admin.advertise.status');
 
@@ -80,4 +86,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('polls/getData', [PollsController::class, 'getPollsData'])->name('admin.polls.getData');
     Route::post('setting/getData', [SettingController::class, 'getSettingData'])->name('admin.setting.getData');
     Route::post('users/getData', [UserController::class, 'getUserData'])->name('admin.users.getData');
+    Route::post('subscriptionPlan/getData', [SubscriptionPlanController::class, 'getData'])->name('admin.subscriptionPlan.getData');
+    Route::post('services/getData', [ServiceController::class, 'getData'])->name('admin.services.getData');
 });

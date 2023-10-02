@@ -18,17 +18,17 @@
                             <li class="{{ Route::currentRouteName() == 'article.*' ? 'active' : '' }}"><a
                                     href="{{ route('article.index') }}"><i class="fa fa-newspaper-o"></i>
                                     <span>Article-List</span></a>
-                                </li>
-                                <li class="{{ Route::currentRouteName() == 'advertise.*' ? 'active' : '' }}"><a
+                            </li>
+                            <li class="{{ Route::currentRouteName() == 'advertise.*' ? 'active' : '' }}"><a
                                     href="{{ route('advertise.index') }}"><i class="icon-users"></i>
                                     <span>Advertise</span></a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="{{ Route::currentRouteName() == 'users.*' ? 'active' : '' }}"><a
-                                href="{{ route('users.index') }}"><i class="icon-user"></i>
-                                <span>User - List</span></a>
-                        </li>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="{{ Route::currentRouteName() == 'users.*' ? 'active' : '' }}"><a
+                            href="{{ route('users.index') }}"><i class="icon-user"></i>
+                            <span>User - List</span></a>
+                    </li>
                     {{--  <li class="{{ Route::currentRouteName() == 'wallet.*' ? 'active' : '' }}"><a
                         href="{{ route('polls.index') }}"><i class="icon-people"></i></i></i>
                         <span>Polls</span></a>
@@ -40,6 +40,14 @@
                     <li class="{{ Route::currentRouteName() == 'setting.*' ? 'active' : '' }}"><a
                             href="{{ route('setting.index') }}"><i class="fa fa-gear"></i>
                             <span>Setting</span></a>
+                    </li>
+                    <li class="{{ Route::currentRouteName() == 'subscriptionPlan.*' ? 'active' : '' }}"><a
+                            href="{{ route('subscriptionPlan.index') }}"><i class="fa fa-bell"></i>
+                            <span>Subscription Plan</span></a>
+                    </li>
+                    <li class="{{ Route::currentRouteName() == 'services.*' ? 'active' : '' }}"><a
+                            href="{{ route('services.index') }}"><i class="fa fa-wrench"></i>
+                            <span>Services</span></a>
                     </li>
                 </ul>
             </div>

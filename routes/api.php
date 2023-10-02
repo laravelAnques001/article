@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\AdvertiseController;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\SubscriptionPlanController;
 use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\TextUI\XmlConfiguration\Group;
@@ -78,4 +80,11 @@ Route::middleware(['auth:api'])->Group(function () {
     Route::get('wallet', [WalletController::class, 'index']);
     Route::post('wallet', [WalletController::class, 'store']);
 
+    // Subscription Plan
+    Route::get('subscription-plan', [SubscriptionPlanController::class, 'index']);
+    Route::get('subscription-plan/{id}', [SubscriptionPlanController::class, 'show']);
+
+    // Service
+    Route::get('services', [ServiceController::class, 'index']);
+    Route::get('services/{id}', [ServiceController::class, 'show']);
 });
