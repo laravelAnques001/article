@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AdvertiseController;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SubscriptionPlanController;
@@ -87,4 +88,8 @@ Route::middleware(['auth:api'])->Group(function () {
     // Service
     Route::get('services', [ServiceController::class, 'index']);
     Route::get('services/{id}', [ServiceController::class, 'show']);
+
+    // Business
+    Route::apiResource('business', BusinessController::class)->only(['index', 'store', 'show', 'destroy']);
+    Route::post('edit-business/{business}', [BusinessController::class, 'update']);
 });
