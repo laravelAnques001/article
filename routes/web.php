@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\AdvertiseController;
 use App\Http\Controllers\Web\ArticleController;
 use App\Http\Controllers\Web\AuthController;
+use App\Http\Controllers\Web\BusinessController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashBoardController;
 use App\Http\Controllers\Web\PollsController;
@@ -71,10 +72,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('users', UserController::class);
     Route::resource('subscriptionPlan', SubscriptionPlanController::class);
     Route::resource('services', ServiceController::class);
+    Route::resource('business', BusinessController::class);
 
     Route::get('article/{id}/{status}', [ArticleController::class, 'status'])->name('admin.article.status');
     Route::get('services/{id}/{status}', [ServiceController::class, 'status'])->name('admin.services.status');
     Route::get('subscriptionPlan/{id}/{status}', [SubscriptionPlanController::class, 'status'])->name('admin.subscriptionPlan.status');
+    Route::get('business/{id}/{status}', [BusinessController::class, 'status'])->name('admin.business.status');
 
     Route::get('advertise/ad_status/{id}/{ad_status}', [AdvertiseController::class, 'adStatus'])->name('admin.advertise.ad_status');
     Route::get('advertise/status/{id}/{status}', [AdvertiseController::class, 'status'])->name('admin.advertise.status');
@@ -88,4 +91,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('users/getData', [UserController::class, 'getUserData'])->name('admin.users.getData');
     Route::post('subscriptionPlan/getData', [SubscriptionPlanController::class, 'getData'])->name('admin.subscriptionPlan.getData');
     Route::post('services/getData', [ServiceController::class, 'getData'])->name('admin.services.getData');
+    Route::post('business/getData', [BusinessController::class, 'getData'])->name('admin.business.getData');
 });

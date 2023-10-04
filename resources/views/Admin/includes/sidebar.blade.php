@@ -49,6 +49,10 @@
                             href="{{ route('services.index') }}"><i class="fa fa-wrench"></i>
                             <span>Services</span></a>
                     </li>
+                    <li class="{{ Route::currentRouteName() == 'business.*' ? 'active' : '' }}"><a
+                            href="{{ route('business.index') }}"><i class="fa fa-briefcase"></i>
+                            <span>Business</span></a>
+                    </li>
                 </ul>
             </div>
         </div>

@@ -17,7 +17,8 @@ class Business extends Model
         'gst_number',
         'service_id',
         'year',
-        'time',
+        'start_time',
+        'end_time',
         'amenities',
         'website',
         'people_search',
@@ -26,6 +27,11 @@ class Business extends Model
         'status',
         'deleted_at',
     ];
+
+    // protected $casts = [
+    //     'start_time' => 'datetime:H:i',
+    //     'end_time' => 'datetime:H:i',
+    // ];
 
     public function user()
     {
@@ -38,11 +44,11 @@ class Business extends Model
         return $this->belongsToMany(Services::class,'businesses_services');
     }
 
-    public static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            $model->user_id = isset(auth()->user()->id) ? auth()->user()->id : 0;
-        });
-    }
+    // public static function boot()
+    // {
+    //     parent::boot();
+    //     static::creating(function ($model) {
+    //         $model->user_id = isset(auth()->user()->id) ? auth()->user()->id : 0;
+    //     });
+    // }
 }

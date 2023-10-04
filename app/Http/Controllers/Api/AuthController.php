@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\Business;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\SendOTPEmail;
@@ -17,17 +18,19 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string',
-            'email' => 'nullable|string|email',
-            'mobile_number' => 'nullable|digits_between:10,12',
-            'dial_code' => 'nullable|digits_between:1,4',
             'type' => 'required|in:email,mobile_number',
+            'email' => ['required_if:type,email', 'string', 'email', 'unique:users,email'],
+            'mobile_number' => ['required_if:type,mobile_number', 'digits_between:10,12'],
+            'dial_code' => 'nullable|digits_between:1,4',
+            'user_type' => 'required|in:Regular,Business',
+            'business_name' => ['required_if:user_type,Business', 'string'],
         ]);
 
-        if ($request->type == 'mobile_number') {
-            $validator = Validator::make($request->all(), [
-                'email' => 'nullable|string|email|unique:users,email',
-            ]);
-        }
+        // if ($request->type == 'mobile_number') {
+        //     $validator = Validator::make($request->all(), [
+        //         'email' => 'nullable|string|email|unique:users,email',
+        //     ]);
+        // }
 
         if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
@@ -37,26 +40,29 @@ class AuthController extends Controller
         $dial_code = isset($request->dial_code) ? $request->dial_code : 91;
         $mobile_number = isset($request->mobile_number) ? $request->mobile_number : null;
         $email = isset($request->email) ? $request->email : null;
+        $business_name = isset($request->business_name) ? $request->business_name : null;
         unset($input['type']);
+        unset($input['business_name']);
 
         if ($request->type == 'email') {
             $user = User::where('email', $email)->first();
             unset($input['email']);
-            if ($user) {
-                $user->fill($input)->save();
-            } else {
+            if (!$user) {
                 return $this->sendError('Validation Error.', ["email" => 'Email Not Valid']);
             }
         } elseif ($request->type == 'mobile_number') {
             $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->first();
             unset($input['mobile_number']);
             unset($input['dial_code']);
-            if ($user) {
-                $user->fill($input)->save();
-            } else {
+            if (!$user) {
                 return $this->sendError('Validation Error.', ["mobile_number" => 'Mobile Number Not Valid']);
             }
         }
+        $user->fill($input)->save();
+        Business::create([
+            'business_name' => $business_name,
+            'user_id' => $user->id,
+        ]);
         return $this->sendResponse([], 'User register successfully.');
     }
 
@@ -159,15 +165,15 @@ class AuthController extends Controller
         $device_token = isset($request->device_token) ? $request->device_token : null;
 
         if ($email) {
-            $user = User::where('email', $email)->where('otp', $request->otp)->where('expire_at', '>=', now())->first();
+            $user = User::where('email', $email)->where('otp', $request->otp)->whereNotNull('expire_at')->where('expire_at', '>=', now())->first();
             if (!$user) {
-                return $this->sendError(["otp" => ['OTP Not Valid!']], '');
+                return $this->sendError('OTP Not Valid!');
             }
         }
         if ($mobile_number && $dial_code) {
-            $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->where('otp', $request->otp)->first();
+            $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->whereNotNull('expire_at')->where('expire_at', '>=', now())->where('otp', $request->otp)->first();
             if (!$user) {
-                return $this->sendError(["otp" => ['OTP Not Valid!']], '');
+                return $this->sendError('OTP Not Valid!');
             }
         }
         if ($user) {
@@ -176,6 +182,10 @@ class AuthController extends Controller
                 'expire_at' => null,
                 'device_token' => $device_token,
             ])->save();
+
+            $business = Business::where('user_id', $user->id)->whereNull('gst_number')->latest()->first();
+            $business_profile = isset($business) ? false : true;
+            $business_id = isset($business->id) ? $business->id : 0;
 
             Auth::login($user);
             $success['id'] = $user->id;
@@ -186,6 +196,8 @@ class AuthController extends Controller
             $success['image_url'] = $user->image_url;
             $success['token'] = $user->createToken('FriendsPointArticle')->accessToken;
             $success['category'] = $user->category->pluck('id')->toArray();
+            $success['business_id'] = $business_id;
+            $success['business_profile'] = $business_profile;
             return $this->sendResponse($success, 'User Login Successfully.');
         }
         return $this->sendError([], 'Email Or Mobile Number Field Required');
@@ -274,8 +286,8 @@ class AuthController extends Controller
         $setting = Setting::where('key', $key)->first();
         if ($setting) {
             return $this->sendResponse($setting->value, 'Setting Data get SuccessFully.');
-        } else {
-            return $this->sendError('Key not valid');
         }
+        return $this->sendError('Key not valid');
+
     }
 }

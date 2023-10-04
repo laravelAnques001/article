@@ -46,8 +46,10 @@ class BusinessController extends Controller
             ->when($my_business, function ($q) use ($my_business) {
                 $q->where('user_id', $my_business);
             })
+            ->when(!$my_business, function ($q) use ($my_business) {
+                $q->where('status', 'Active');
+            })
             ->whereNull('deleted_at')
-            ->where('status', 'Active')
             ->orderByDesc('id')
             ->paginate(10);
         if ($business) {
@@ -71,7 +73,8 @@ class BusinessController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
-        }    
+        }
+        $validated['user_id'] = auth()->id();
         $business = Business::create($validated);
         $business->service()->sync($services);
         return $this->sendResponse($business->id, 'Business Created Successfully.');
@@ -124,7 +127,7 @@ class BusinessController extends Controller
                 return response()->json(['errors' => $validator->errors()], 422);
             }
             $business->service()->sync($services);
-        }      
+        }
         unset($validated['status']);
         $business->fill($validated)->save();
         return $this->sendResponse([], 'Business Updated Successfully.');
