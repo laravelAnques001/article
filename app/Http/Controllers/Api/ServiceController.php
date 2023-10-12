@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Services;
+use App\Models\Setting;
+use App\Models\Business;
 use Illuminate\Http\Request;
 
 class ServiceController extends Controller
@@ -40,6 +42,26 @@ class ServiceController extends Controller
         if ($services) {
             return $this->sendResponse($services, 'Services Record Show SuccessFully.');
         }
-        return $this->sendError([], 'Record Not Found.');
+        return $this->sendError('Record Not Found.');
+    }
+
+    public function discoverList(){
+        $setting = Setting::whereIn('key',['first_discover_banner','second_discover_banner'])->pluck('value','key')->toArray();
+
+        $setting['popular_services'] = Services::select('id','title','company_name','location','image','description','status')->withCount('business')->orderByDesc('business_count')->take(8)->get();
+
+        $setting['our_services'] = Services::select('id','title','company_name','location','image','description','status')->with('business:user_id')->whereHas('business',function($q){
+            $q->where('user_id',auth()->id());
+        })->where('status','Active')->get();       
+       
+        return $this->sendResponse($setting, 'Discover-List Record Get SuccessFully.');
+    }   
+
+    public function serviceBusinessList($id){
+        $serviceBusiness =  Business::with('service:title')->whereHas('service',function($q) use($id){
+            $q->where('id', base64_decode($id));
+        })->where('status','Active')->get();
+
+        return $this->sendResponse($serviceBusiness, 'Service Business Record Get SuccessFully.');
     }
 }

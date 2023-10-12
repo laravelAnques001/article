@@ -168,7 +168,7 @@
                                             <input type="file" class="file-styled" name="images[]" id="images"
                                                 multiple value="{{ old('images') }}" accept="image/*">
                                             @foreach ($images as $image)
-                                                <img src="{{ $image }}" alt="Article Media" width="100"
+                                                <img src="{{ $image }}" alt="Business Media" width="100"
                                                     height="100" class="ml-5">
                                             @endforeach
                                             @error('images')
@@ -181,7 +181,7 @@
                                         <label class="col-lg-3 control-label" for="description">Description:</label>
                                         <div class="col-lg-9">
                                             <textarea rows="2" cols="5" class="form-control" name="description" id="description"
-                                                value="{{ old('description') }}" placeholder="Enter Article Description">{{ old('description', $business->description) }}</textarea>
+                                                value="{{ old('description') }}" placeholder="Enter Business Description">{{ old('description', $business->description) }}</textarea>
                                             @error('description')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror

@@ -39,6 +39,6 @@ class SubscriptionPlanController extends Controller
         if ($subscriptionPlan) {
             return $this->sendResponse($subscriptionPlan, 'Subscription Plan Record Show SuccessFully.');
         }
-        return $this->sendError([], 'Record Not Found.');
+        return $this->sendError('Record Not Found.');
     }
 }

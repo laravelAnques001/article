@@ -21,7 +21,8 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'image_url' => $this->image_url,
             'token' => $this->createToken('FriendsPointArticle')->accessToken,
-            'category' => $this->category->pluck('id')->toArray()
+            'category' => $this->category->pluck('id')->toArray(),
+            'business_name' => isset($this->business[0]->business_name) ? $this->business[0]->business_name : null
         ];
     }
 }

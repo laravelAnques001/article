@@ -214,7 +214,7 @@ class ArticleController extends Controller
         if ($article) {
             return $this->sendResponse($article, 'Article Record Get Successfully.');
         } else {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');           
         }
     }
 
@@ -222,7 +222,7 @@ class ArticleController extends Controller
     {
         $article = Article::whereNull('deleted_at')->find(base64_decode($id));
         if (!$article) {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');
         }
         $validated = $request->validated();
         if ($category_id = $request->category_id) {
@@ -285,7 +285,7 @@ class ArticleController extends Controller
             $article->fill(['deleted_at' => now()])->save();
             return $this->sendResponse([], 'Article Deleted Successfully.');
         } else {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');
         }
     }
 
@@ -298,7 +298,7 @@ class ArticleController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return $this->sendError($validated->errors(), 'Validation Error.');
+            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
         }
 
         //article start
@@ -325,7 +325,7 @@ class ArticleController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return $this->sendError($validated->errors(), 'Validation Error.');
+            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
         }
 
         $articleLSI = ArticleLikeShare::where('user_id', auth()->id())->where('article_id', $request->article_id)->first();

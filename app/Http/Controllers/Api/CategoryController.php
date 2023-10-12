@@ -38,7 +38,7 @@ class CategoryController extends Controller
         if ($category) {
             return $this->sendResponse(new CategoryResource($category), 'Category Record Show SuccessFully.');
         } else {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');
         }
     }
 

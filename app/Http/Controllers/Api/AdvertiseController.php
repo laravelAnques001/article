@@ -98,7 +98,7 @@ class AdvertiseController extends Controller
         if ($advertise) {
             return $this->sendResponse($advertise, 'Advertise Record Get Successfully.');
         } else {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');
         }
     }
     /**
@@ -111,7 +111,7 @@ class AdvertiseController extends Controller
     {
         $advertise = Advertise::whereNull('deleted_at')->find(base64_decode($id));
         if (!$advertise) {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');
         }
         $validated = $request->validated();
         $advertise->fill($validated)->save();
@@ -136,7 +136,7 @@ class AdvertiseController extends Controller
             $advertise->fill(['deleted_at' => now()])->save();
             return $this->sendResponse([], 'Advertise Deleted Successfully.');
         } else {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');
         }
     }
 
@@ -222,7 +222,7 @@ class AdvertiseController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());
+            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
         }
 
         $article = isset($request->article_id) ? $request->article_id : 0;

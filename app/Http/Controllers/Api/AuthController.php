@@ -11,9 +11,16 @@ use App\Notifications\SendOTPEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use App\Common\GeneralComponent;
 class AuthController extends Controller
 {
+    public $general;
+
+    public function __construct() {
+        $this->general = new GeneralComponent();
+    }
+
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -23,7 +30,7 @@ class AuthController extends Controller
             'mobile_number' => ['required_if:type,mobile_number', 'digits_between:10,12'],
             'dial_code' => 'nullable|digits_between:1,4',
             'user_type' => 'required|in:Regular,Business',
-            'business_name' => ['required_if:user_type,Business', 'string'],
+            'business_name' => ['required_if:user_type,Business', 'string','unique:businesses,business_name'],
         ]);
 
         // if ($request->type == 'mobile_number') {
@@ -33,7 +40,7 @@ class AuthController extends Controller
         // }
 
         if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());
+            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
         }
 
         $input = $request->all();
@@ -48,18 +55,18 @@ class AuthController extends Controller
             $user = User::where('email', $email)->first();
             unset($input['email']);
             if (!$user) {
-                return $this->sendError('Validation Error.', ["email" => 'Email Not Valid']);
+                return $this->sendError('Email Not Valid');
             }
         } elseif ($request->type == 'mobile_number') {
             $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->first();
             unset($input['mobile_number']);
             unset($input['dial_code']);
             if (!$user) {
-                return $this->sendError('Validation Error.', ["mobile_number" => 'Mobile Number Not Valid']);
+                return $this->sendError('Mobile Number Not Valid');
             }
         }
         $user->fill($input)->save();
-        Business::create([
+        $business = Business::create([
             'business_name' => $business_name,
             'user_id' => $user->id,
         ]);
@@ -75,51 +82,69 @@ class AuthController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return $this->sendError($validated->errors(), 'Validation Errors!');
+            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
         }
 
         $dial_code = isset($request->dial_code) ? $request->dial_code : 91;
         $mobile_number = isset($request->mobile_number) ? $request->mobile_number : null;
         $email = isset($request->email) ? $request->email : null;
-        // $userOtp = rand(1000, 9999);
-        $userOtp = 1234;
+
+        // user OTP Genrate And Send start
+        if(env('APP_ENV') == 'local'){
+            $userOtp = 1234;
+            $response = 200;
+        }else{
+            $userOtp = rand(1000, 9999);
+            if ($mobile_number && $dial_code) {
+                // sms send start
+                $msgResponse =  $this->general->sendSMSOtp($otp, $request->mobile_number);
+                return $this->sendResponse(json_decode($msgResponse)->code,$otp );
+                // sms send end
+            }else{
+                $response = 200;
+            }
+        }
         $expire_at = now()->addMinute(10);
+        // user OTP Genrate And Send end
 
-        if ($email) {
-            $user = User::where('email', $email)->first();
-            if ($user) {
-                $user->fill([
-                    'otp' => $userOtp,
-                    'expire_at' => $expire_at,
-                ])->save();
-            } else {
-                $user = User::create([
-                    'email' => $email,
-                    'otp' => $userOtp,
-                    'expire_at' => $expire_at,
-                ]);
+        if($response == 200){
+            if ($email) {
+                $user = User::where('email', $email)->first();
+                if ($user) {
+                    $user->fill([
+                        'otp' => $userOtp,
+                        'expire_at' => $expire_at,
+                    ])->save();
+                } else {
+                    $user = User::create([
+                        'email' => $email,
+                        'otp' => $userOtp,
+                        'expire_at' => $expire_at,
+                    ]);
+                }
+                $user->notify(new SendOTPEmail($userOtp));
+                return $this->sendResponse(null, 'Your Email OTP Send SuccessFully');
             }
-            $user->notify(new SendOTPEmail($userOtp));
-            return $this->sendResponse([], 'Your Email OTP Send SuccessFully');
-        }
-
-        if ($mobile_number && $dial_code) {
-            $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->first();
-            if ($user) {
-                $user->fill([
-                    'otp' => $userOtp,
-                    'expire_at' => $expire_at,
-                ])->save();
-            } else {
-                $user = User::create([
-                    'dial_code' => $dial_code,
-                    'mobile_number' => $mobile_number,
-                    'otp' => $userOtp,
-                    'expire_at' => $expire_at,
-                ]);
+    
+            if ($mobile_number && $dial_code) {
+                $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->first();
+                if ($user) {
+                    $user->fill([
+                        'otp' => $userOtp,
+                        'expire_at' => $expire_at,
+                    ])->save();
+                } else {
+                    $user = User::create([
+                        'dial_code' => $dial_code,
+                        'mobile_number' => $mobile_number,
+                        'otp' => $userOtp,
+                        'expire_at' => $expire_at,
+                    ]);
+                }
+                return $this->sendResponse(null, 'Your Mobile Number OTP Send SuccessFully');
             }
-            return $this->sendResponse($userOtp, 'Your Mobile Number OTP Send SuccessFully');
         }
+        return $this->sendError('Server Issue OTP Not Send');
     }
 
     // public function otpGenerate(Request $request)
@@ -157,23 +182,23 @@ class AuthController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return $this->sendError($validated->errors(), 'Validation Errors!');
+            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
         }
         $dial_code = isset($request->dial_code) ? $request->dial_code : 91;
         $mobile_number = isset($request->mobile_number) ? $request->mobile_number : null;
         $email = isset($request->email) ? $request->email : null;
         $device_token = isset($request->device_token) ? $request->device_token : null;
-
+        $user = null;
         if ($email) {
             $user = User::where('email', $email)->where('otp', $request->otp)->whereNotNull('expire_at')->where('expire_at', '>=', now())->first();
             if (!$user) {
-                return $this->sendError('OTP Not Valid!');
+                return $this->sendError('OTP not valid!');
             }
         }
         if ($mobile_number && $dial_code) {
             $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->whereNotNull('expire_at')->where('expire_at', '>=', now())->where('otp', $request->otp)->first();
             if (!$user) {
-                return $this->sendError('OTP Not Valid!');
+                return $this->sendError('OTP not valid!');
             }
         }
         if ($user) {
@@ -186,6 +211,7 @@ class AuthController extends Controller
             $business = Business::where('user_id', $user->id)->whereNull('gst_number')->latest()->first();
             $business_profile = isset($business) ? false : true;
             $business_id = isset($business->id) ? $business->id : 0;
+            $business_name = isset($business->business_name) ? $business->business_name : null;
 
             Auth::login($user);
             $success['id'] = $user->id;
@@ -197,10 +223,11 @@ class AuthController extends Controller
             $success['token'] = $user->createToken('FriendsPointArticle')->accessToken;
             $success['category'] = $user->category->pluck('id')->toArray();
             $success['business_id'] = $business_id;
+            $success['business_name'] = $business_name;
             $success['business_profile'] = $business_profile;
             return $this->sendResponse($success, 'User Login Successfully.');
         }
-        return $this->sendError([], 'Email Or Mobile Number Field Required');
+        return $this->sendError('Email Or Mobile Number Field Required');
     }
 
     public function logout(Request $request)
@@ -209,7 +236,7 @@ class AuthController extends Controller
         if ($result) {
             return $this->sendResponse([], 'User Logout Successfully.', 200);
         } else {
-            return $this->sendError([], 'Something Is Wrong.', 400);
+            return $this->sendError('Something Is Wrong.');
         }
     }
 
@@ -245,25 +272,15 @@ class AuthController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return $this->sendError($validated->errors(), 'Validation Error.');
+            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
         }
         $validated = $request->all();
-        $user = User::find($userId);
-
-        // if ($image = $request->image ?? null) {
-        //     if ($oldImage = $user->image ?? null) {
-        //         $fileCheck = storage_path('app/' . $oldImage);
-        //         if (file_exists($fileCheck)) {
-        //             unlink($fileCheck);
-        //         }
-        //     }
-        //     $validated['image'] = $image->store('public/user');
-        // }
+        $user = User::with('business')->find($userId);
+   
         if ($categoryIds = $request->category_id) {
             $categories = explode(',', $categoryIds);
             $user->category()->sync($categories);
         }
-
         $user->fill($validated)->save();
         return $this->sendResponse(new UserResource($user), 'Profile Updated SuccessFully.');
     }

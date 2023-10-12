@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\EnquiryController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SubscriptionPlanController;
 use App\Http\Controllers\Api\WalletController;
@@ -91,4 +92,15 @@ Route::middleware(['auth:api'])->Group(function () {
     // Business
     Route::apiResource('business', BusinessController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::post('edit-business/{business}', [BusinessController::class, 'update']);
+    Route::get('business/rating-review-list/{id}', [BusinessController::class, 'ratingReviewList']);
+
+    // Enquiry
+    Route::apiResource('enquiry', EnquiryController::class)->only(['index', 'store', 'show']);
+
+    // Business Rating And Review
+    Route::post('business/rating-review',[BusinessController::class,'ratingReview']);
+
+    // Discover List
+    Route::get('discover-list', [ServiceController::class,'discoverList']);
+    Route::get('service-business-list/{id}', [ServiceController::class,'serviceBusinessList']);
 });

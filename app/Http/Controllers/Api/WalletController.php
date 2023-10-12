@@ -67,7 +67,7 @@ class WalletController extends Controller
         if ($wallet) {
             return $this->sendResponse(new WalletResource($wallet), 'Wallet Record Show SuccessFully.');
         } else {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');
         }
     }
 
@@ -82,7 +82,7 @@ class WalletController extends Controller
     {
         $wallet = Wallet::whereNull('deleted_at')->find(base64_decode($id));
         if (!$wallet) {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');
         }
 
         $validated = $request->validated();
@@ -103,7 +103,7 @@ class WalletController extends Controller
             $wallet->fill(['deleted_at' => now()])->save();
             return $this->sendResponse([], 'Wallet Deleted Successfully.');
         } else {
-            return $this->sendError([], 'Record Not Found.');
+            return $this->sendError('Record Not Found.');
         }
     }
 }
