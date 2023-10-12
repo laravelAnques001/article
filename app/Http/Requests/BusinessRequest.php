@@ -27,7 +27,7 @@ class BusinessRequest extends FormRequest
             'business_name' => 'required|string',
             'gst_number' => 'nullable|gst',
             'service_id' => 'nullable|exists:services,id',
-            'year' => 'nullable|date_format:Y',
+            'year' => ['nullable', 'date_format:Y', 'before_or_equal:' . date('Y')],
             'start_time' => 'nullable|date_format:H:i:s',
             'end_time' => 'nullable|date_format:H:i:s|after_or_equal:start_time',
             'amenities' => 'nullable|string',

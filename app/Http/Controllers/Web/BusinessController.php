@@ -186,4 +186,11 @@ class BusinessController extends Controller
         exit;
     }
 
+    public function businessView($id)
+    {
+        $business = Business::with('service')->whereNull('deleted_at')->find(base64_decode($id)) ?? abort(404);
+        $images = explode(',', $business->images);
+        return view('business', compact('business', 'images'));
+    }
+
 }

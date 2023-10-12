@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BusinessRatingReviewRequest;
 use App\Http\Requests\BusinessRequest;
 use App\Models\Business;
 use App\Models\BusinessRatingReview;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use App\Http\Requests\BusinessRatingReviewRequest;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Validator;
 
 class BusinessController extends Controller
 {
@@ -23,42 +22,42 @@ class BusinessController extends Controller
     {
         $search = isset($request->search) ? $request->search : null;
         $my_business = isset($request->my_business) ? auth()->id() : null;
-        if($search){
-            $business = Business::select('id', 'user_id', 'business_name', 'gst_number', 'year', 'start_time', 'end_time','amenities', 'website', 'people_search', 'description', 'images', 'status')
-            ->with(['user' => function ($q) use ($search) {
-                $q->select('id', 'name', 'email', 'image');
-                $q->where('name', 'like', '%' . $search . '%');
-                $q->orWhere('email', 'like', '%' . $search . '%');
-            }])
-            ->with(['service' => function ($q) use ($search) {
-                $q->select('id', 'title', 'company_name');
-                $q->where('title', 'like', '%' . $search . '%');
-                $q->orWhere('company_name', 'like', '%' . $search . '%');
-            }])          
-            ->where('business_name', 'like', '%' . $search . '%')
-            ->orWhere('gst_number', 'like', '%' . $search . '%')
-            ->orWhere('year', 'like', '%' . $search . '%')
-            ->orWhere('start_time', 'like', '%' . $search . '%')
-            ->orWhere('end_time', 'like', '%' . $search . '%')
-            ->orWhere('website', 'like', '%' . $search . '%')
-            ->orWhere('people_search', 'like', '%' . $search . '%')           
-            ->when($my_business, function ($q) use ($my_business) {
-                $q->where('user_id', $my_business);
-            })
-            ->when(!$my_business, function ($q) use ($my_business) {
-                $q->where('status', 'Active');
-            })
-            ->whereNull('deleted_at')
-            ->orderByDesc('id')
-            ->paginate(10);
-        }else{
-            $business = Business::select('id', 'user_id', 'business_name', 'gst_number',  'year', 'start_time','end_time', 'amenities', 'website', 'people_search', 'description', 'images', 'status')
-                ->with(['user' => function ($q){
-                    $q->select('id', 'name', 'email', 'image');              
+        if ($search) {
+            $business = Business::select('id', 'user_id', 'business_name', 'gst_number', 'year', 'start_time', 'end_time', 'amenities', 'website', 'people_search', 'description', 'images', 'status')
+                ->with(['user' => function ($q) use ($search) {
+                    $q->select('id', 'name', 'email', 'image');
+                    $q->where('name', 'like', '%' . $search . '%');
+                    $q->orWhere('email', 'like', '%' . $search . '%');
+                }])
+                ->with(['service' => function ($q) use ($search) {
+                    $q->select('id', 'title', 'company_name');
+                    $q->where('title', 'like', '%' . $search . '%');
+                    $q->orWhere('company_name', 'like', '%' . $search . '%');
+                }])
+                ->where('business_name', 'like', '%' . $search . '%')
+                ->orWhere('gst_number', 'like', '%' . $search . '%')
+                ->orWhere('year', 'like', '%' . $search . '%')
+                ->orWhere('start_time', 'like', '%' . $search . '%')
+                ->orWhere('end_time', 'like', '%' . $search . '%')
+                ->orWhere('website', 'like', '%' . $search . '%')
+                ->orWhere('people_search', 'like', '%' . $search . '%')
+                ->when($my_business, function ($q) use ($my_business) {
+                    $q->where('user_id', $my_business);
+                })
+                ->when(!$my_business, function ($q) use ($my_business) {
+                    $q->where('status', 'Active');
+                })
+                ->whereNull('deleted_at')
+                ->orderByDesc('id')
+                ->paginate(10);
+        } else {
+            $business = Business::select('id', 'user_id', 'business_name', 'gst_number', 'year', 'start_time', 'end_time', 'amenities', 'website', 'people_search', 'description', 'images', 'status')
+                ->with(['user' => function ($q) {
+                    $q->select('id', 'name', 'email', 'image');
                 }])
                 ->with(['service' => function ($q) {
-                    $q->select('id', 'title', 'company_name');              
-                }])          
+                    $q->select('id', 'title', 'company_name');
+                }])
                 ->when($my_business, function ($q) use ($my_business) {
                     $q->where('user_id', $my_business);
                 })
@@ -91,7 +90,9 @@ class BusinessController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
+        unset($validated['service_id']);
         $validated['user_id'] = auth()->id();
+        return $validated;
         $business = Business::create($validated);
         $business->service()->sync($services);
         return $this->sendResponse($business->id, 'Business Created Successfully.');
@@ -105,7 +106,7 @@ class BusinessController extends Controller
      */
     public function show($id)
     {
-        $business = Business::select('id', 'user_id', 'business_name', 'gst_number',  'year', 'start_time','end_time', 'amenities', 'website', 'people_search', 'description', 'images', 'status')
+        $business = Business::select('id', 'user_id', 'business_name', 'gst_number', 'year', 'start_time', 'end_time', 'amenities', 'website', 'people_search', 'description', 'images', 'status')
             ->with(['user' => function ($q) {
                 $q->select('id', 'name', 'email', 'image');
             }])
@@ -115,7 +116,7 @@ class BusinessController extends Controller
             ->where('status', 'Active')
             ->whereNull('deleted_at')
             ->find(base64_decode($id));
-        
+
         if ($business) {
             return $this->sendResponse($business, 'Business Record Get Successfully.');
         }
@@ -167,39 +168,41 @@ class BusinessController extends Controller
         return $this->sendError('Record Not Found.');
     }
 
-    public function ratingReview(BusinessRatingReviewRequest $request){
-        $validated  = $request->validated();
+    public function ratingReview(BusinessRatingReviewRequest $request)
+    {
+        $validated = $request->validated();
         $user_id = Auth::user()->id;
         $rating = isset($request->rating) ? $request->rating : null;
         $review = isset($request->review) ? $request->review : null;
 
-        if($rating){
+        if ($rating) {
             BusinessRatingReview::updateOrCreate(
                 [
-                'business_id' => $request->business_id,
-                'user_id' => $user_id
-            ],
-            [
-                'rating' => $request->rating
-            ]);
+                    'business_id' => $request->business_id,
+                    'user_id' => $user_id,
+                ],
+                [
+                    'rating' => $request->rating,
+                ]);
         }
 
-        if($review){
+        if ($review) {
             BusinessRatingReview::updateOrCreate(
                 [
-                'business_id' => $request->business_id,
-                'user_id' => $user_id
-            ],
-            [
-                'review' => $request->review
-            ]);
+                    'business_id' => $request->business_id,
+                    'user_id' => $user_id,
+                ],
+                [
+                    'review' => $request->review,
+                ]);
         }
 
         return $this->sendResponse([], 'Business Rating-Review Created Successfully.');
     }
 
-    public function ratingReviewList($id){
-        $ratingReviewList = BusinessRatingReview::select('user_id','rating','review')->where('business_id',base64_decode($id))->get();
+    public function ratingReviewList($id)
+    {
+        $ratingReviewList = BusinessRatingReview::select('user_id', 'rating', 'review')->where('business_id', base64_decode($id))->get();
         return $this->sendResponse($ratingReviewList, 'Business Rating-Review Record Get SuccessFully.');
     }
 }

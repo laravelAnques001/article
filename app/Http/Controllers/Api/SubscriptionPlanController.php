@@ -50,4 +50,14 @@ class SubscriptionPlanController extends Controller
         SubscriptionPlanPurchase::create($validated);
         return $this->sendResponse([], 'Subscription Plan Purchase Record Store SuccessFully.');
     }
+
+    public function subscriptionPlanHistory()
+    {
+        $spHistory = SubscriptionPlanPurchase::select('id','service_id','business_id','payment_response')->with('business', 'service')->whereHas('business', function ($q) {
+            $q->where('user_id', auth()->id());
+        })->whereNull('deleted_at')
+            ->get();
+
+        return $this->sendResponse($spHistory, 'Subscription Plan History Get SuccessFully.');
+    }
 }

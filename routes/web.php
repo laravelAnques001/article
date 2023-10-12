@@ -55,6 +55,8 @@ Route::get('term-condition', function () {
 
 Route::get('article-view/{id}', [ArticleController::class, 'articleView']);
 
+Route::get('business-view/{id}', [BusinessController::class, 'businessView'])->name('businessView');
+
 Route::group(['middleware' => 'auth'], function () {
 
     Route::get('dashboard', [DashBoardController::class, 'dashboard'])->name('dashboard');

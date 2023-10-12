@@ -28,7 +28,7 @@ class Business extends Model
         'deleted_at',
     ];
 
-    protected $appends = ['rating','review'];
+    protected $appends = ['rating', 'review', 'old_years', 'web_link'];
     // protected $casts = [
     //     'start_time' => 'datetime:H:i',
     //     'end_time' => 'datetime:H:i',
@@ -60,15 +60,27 @@ class Business extends Model
 
     public function ratingReview()
     {
-        return $this->hasMany(BusinessRatingReview::class)->select('id','business_id','user_id','rating','review');
+        return $this->hasMany(BusinessRatingReview::class)->select('id', 'business_id', 'user_id', 'rating', 'review');
     }
 
-    public function getRatingAttribute(){
-       $avg =  $this->hasMany(BusinessRatingReview::class)->avg('rating');
-       return $avg ? number_format($avg, 2):0;
+    public function getRatingAttribute()
+    {
+        $avg = $this->hasMany(BusinessRatingReview::class)->avg('rating');
+        return $avg ? number_format($avg, 2) : 0;
     }
 
-    public function getReviewAttribute(){
+    public function getReviewAttribute()
+    {
         return $this->hasMany(BusinessRatingReview::class)->count('review');
+    }
+
+    public function getOldYearsAttribute()
+    {
+        return $this->year ? (date('Y') - $this->year) . ' years in Business' : null;
+    }
+
+    public function getWebLinkAttribute()
+    {
+        return route('businessView', base64_encode($this->id));
     }
 }
