@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ config('app.name') }} | Business List
+    {{ config('app.name') }} | Enquiry List
 @endsection
 @push('custom-scripts')
     <!-- Theme JS files -->
@@ -41,12 +41,13 @@
                         'dropup');
                 }
             });
+
             $('.customer-table').DataTable({
                 "processing": true,
                 "serverSide": true,
                 "select": true,
                 "ajax": {
-                    "url": "{{ route('admin.business.getData') }}",
+                    "url": "{{ route('admin.enquiry.getData') }}",
                     "dataType": "json",
                     "type": "POST",
                     "data": {
@@ -62,31 +63,19 @@
                         "data": "id"
                     },
                     {
-                        "data": "user_id"
+                        "data": "user.name"
                     },
                     {
-                        "data": "business_name"
+                        "data": "business.business_name"
                     },
                     {
-                        "data": "gst_number"
+                        "data": "name"
                     },
                     {
-                        "data": "year"
+                        "data": "email"
                     },
                     {
-                        "data": "website"
-                    },
-                    {
-                        "data": "image"
-                    },
-                    {
-                        "data": "rating"
-                    },
-                    {
-                        "data": "review"
-                    },
-                    {
-                        "data": "status"
+                        "data": "mobile_number"
                     },
                     {
                         "data": "date"
@@ -121,7 +110,7 @@
                                 }).done(function(data) {
                                     swal({
                                         title: "Deleted!",
-                                        text: "Business has been successfully deleted..",
+                                        text: "Business Enquiry has been successfully deleted..",
                                         type: "success",
                                         showCancelButton: true,
                                         closeOnConfirm: false,
@@ -143,82 +132,7 @@
                         });
 
                 });
-                var i = 0;
-                if (Array.prototype.forEach) {
 
-                    var elems = $('.switchery');
-                    $.each(elems, function(key, value) {
-                        var $size = "",
-                            $color = "",
-                            $sizeClass = "",
-                            $colorCode = "";
-                        $size = $(this).data('size');
-                        var $sizes = {
-                            'lg': "large",
-                            'sm': "small",
-                            'xs': "xsmall"
-                        };
-                        if ($(this).data('size') !== undefined) {
-                            $sizeClass = "switchery switchery-" + $sizes[$size];
-                        } else {
-                            $sizeClass = "switchery";
-                        }
-
-                        $color = $(this).data('color');
-                        var $colors = {
-                            'primary': "#967ADC",
-                            'success': "#37BC9B",
-                            'danger': "#DA4453",
-                            'warning': "#F6BB42",
-                            'info': "#3BAFDA"
-                        };
-                        if ($color !== undefined) {
-                            $colorCode = $colors[$color];
-                        } else {
-                            $colorCode = "#37BC9B";
-                        }
-
-                        var switchery = new Switchery($(this)[0], {
-                            className: $sizeClass,
-                            color: $colorCode
-                        });
-                    });
-                } else {
-                    var elems1 = document.querySelectorAll('.switchery');
-                    for (i = 0; i < elems1.length; i++) {
-                        var $size = elems1[i].data('size');
-                        var $color = elems1[i].data('color');
-                        var switchery = new Switchery(elems1[i], {
-                            color: '#37BC9B'
-                        });
-                    }
-                }
-
-                $(".switch").change(function() {
-                    var id = $(this).attr("data-value");
-                    var state = 'Deactive';
-                    if ($(this).prop("checked") == true) {
-                        state = 'Active';
-                    } else if ($(this).prop("checked") == false) {
-                        state = 'Deactive';
-                    }
-                    var url = "{{ URL::to('business') }}";
-                    url = url + "/" + id + "/" + state;
-                    $.ajax({
-                        url: url,
-                    }).done(function(data) {
-                        if (data == 1) {
-                            if (state == 'Active') {
-                                toastr.success('Business has been Active', 'Activated');
-                            } else {
-                                toastr.error('Business has been Deactive', 'Deactivated');
-                            }
-                        } else {
-                            toastr.error('Something went wrong..', 'Error');
-                        }
-
-                    });
-                });
             }
             $('.dataTables_length select').select2({
                 minimumResultsForSearch: Infinity,
@@ -234,19 +148,12 @@
         <div class="page-header">
             <div class="page-header-content">
                 <div class="page-title">
-                    <h4><span class="text-semibold">Business list</span></h4>
-                </div>
-                <div class="heading-elements">
-                    <div class="heading-btn-group">
-                        <a href="{{ route('business.create') }}" class="btn btn-labeled-right bg-blue heading-btn">Create
-                            Business
-                        </a>
-                    </div>
+                    <h4><span class="text-semibold">Business Enquiry list</span></h4>
                 </div>
             </div>
             <div class="breadcrumb-line breadcrumb-line-component">
                 <ul class="breadcrumb">
-                    <li>Business list</li>
+                    <li>Business Enquiry list</li>
                 </ul>
             </div>
         </div>
@@ -265,13 +172,9 @@
                                     <th>#</th>
                                     <th>Author Name</th>
                                     <th>Business Name</th>
-                                    <th>GST No</th>
-                                    <th>Year</th>
-                                    <th>Website</th>
-                                    <th>Image</th>
-                                    <th>Rating</th>
-                                    <th>Review</th>
-                                    <th>Status<br><small style="font-size: 70%;">(On=Approved,Off=In-Review)</small></th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Mobile Number</th>
                                     <th>Created At</th>
                                 </tr>
                             </thead>

@@ -53,6 +53,14 @@
                             href="{{ route('business.index') }}"><i class="fa fa-briefcase"></i>
                             <span>Business</span></a>
                     </li>
+                    <li class="{{ Route::currentRouteName() == 'enquiry.*' ? 'active' : '' }}"><a
+                            href="{{ route('enquiry.index') }}"><i class="fa fa-briefcase"></i>
+                            <span>Business Enquiry</span></a>
+                    </li>
+                    <li class="{{ Route::currentRouteName() == 'digitalServiceApply.*' ? 'active' : '' }}"><a
+                            href="{{ route('digitalServiceApply.index') }}"><i class="fa fa-briefcase"></i>
+                            <span>Digital Service Apply</span></a>
+                    </li>
                 </ul>
             </div>
         </div>

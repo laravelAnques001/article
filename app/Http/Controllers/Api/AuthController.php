@@ -40,7 +40,7 @@ class AuthController extends Controller
         // }
 
         if ($validator->fails()) {
-            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
+            return response()->json(['success' => false,'message' => $validator->errors()->first()]);
         }
 
         $input = $request->all();
@@ -97,8 +97,8 @@ class AuthController extends Controller
             $userOtp = rand(1000, 9999);
             if ($mobile_number && $dial_code) {
                 // sms send start
-                $msgResponse =  $this->general->sendSMSOtp($otp, $request->mobile_number);
-                return $this->sendResponse(json_decode($msgResponse)->code,$otp );
+                $msgResponse =  $this->general->sendSMSOtp($userOtp, $request->mobile_number);
+                return $this->sendResponse(json_decode($msgResponse)->code,$userOtp );
                 // sms send end
             }else{
                 $response = 200;
@@ -125,7 +125,7 @@ class AuthController extends Controller
                 $user->notify(new SendOTPEmail($userOtp));
                 return $this->sendResponse(null, 'Your Email OTP Send SuccessFully');
             }
-    
+
             if ($mobile_number && $dial_code) {
                 $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->first();
                 if ($user) {
@@ -276,7 +276,7 @@ class AuthController extends Controller
         }
         $validated = $request->all();
         $user = User::with('business')->find($userId);
-   
+
         if ($categoryIds = $request->category_id) {
             $categories = explode(',', $categoryIds);
             $user->category()->sync($categories);

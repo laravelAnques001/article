@@ -6,7 +6,9 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\BusinessController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\DashBoardController;
+use App\Http\Controllers\Web\EnquiryController;
 use App\Http\Controllers\Web\PollsController;
+use App\Http\Controllers\Web\ServiceApplyController;
 use App\Http\Controllers\Web\ServiceController;
 use App\Http\Controllers\Web\SettingController;
 use App\Http\Controllers\Web\SubscriptionPlanController;
@@ -92,4 +94,16 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('subscriptionPlan/getData', [SubscriptionPlanController::class, 'getData'])->name('admin.subscriptionPlan.getData');
     Route::post('services/getData', [ServiceController::class, 'getData'])->name('admin.services.getData');
     Route::post('business/getData', [BusinessController::class, 'getData'])->name('admin.business.getData');
+
+    // Enquiry
+    Route::post('enquiry/getData', [EnquiryController::class, 'getData'])->name('admin.enquiry.getData');
+    Route::get('enquiry', [EnquiryController::class, 'index'])->name('enquiry.index');
+    Route::delete('enquiry/{enquiry}', [EnquiryController::class, 'destroy'])->name('enquiry.destroy');
+
+    // Digital Service Apply
+    Route::get('digital-service-apply', [ServiceApplyController::class, 'index'])->name('digitalServiceApply.index');
+    Route::get('digital-service-apply/{enquiry}', [ServiceApplyController::class, 'show'])->name('digitalServiceApply.show');
+    Route::delete('digital-service-apply/{enquiry}', [ServiceApplyController::class, 'destroy'])->name('digitalServiceApply.destroy');
+    Route::post('digital-service-apply/getData', [ServiceApplyController::class, 'getData'])->name('admin.digitalServiceApply.getData');
+
 });
