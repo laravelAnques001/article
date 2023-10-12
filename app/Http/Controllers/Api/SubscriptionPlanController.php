@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SubscriptionPlanPurchaseRequests;
 use App\Models\SubscriptionPlan;
+use App\Models\SubscriptionPlanPurchase;
 use Illuminate\Http\Request;
 
 class SubscriptionPlanController extends Controller
@@ -40,5 +42,12 @@ class SubscriptionPlanController extends Controller
             return $this->sendResponse($subscriptionPlan, 'Subscription Plan Record Show SuccessFully.');
         }
         return $this->sendError('Record Not Found.');
+    }
+
+    public function subscriptionPlanPurchase(SubscriptionPlanPurchaseRequests $request)
+    {
+        $validated = $request->validated();
+        SubscriptionPlanPurchase::create($validated);
+        return $this->sendResponse([], 'Subscription Plan Purchase Record Store SuccessFully.');
     }
 }

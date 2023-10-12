@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DigitalServiceApplyRequest;
+use App\Models\Business;
+use App\Models\ServiceApply;
 use App\Models\Services;
 use App\Models\Setting;
-use App\Models\Business;
 use Illuminate\Http\Request;
 
 class ServiceController extends Controller
@@ -45,23 +47,32 @@ class ServiceController extends Controller
         return $this->sendError('Record Not Found.');
     }
 
-    public function discoverList(){
-        $setting = Setting::whereIn('key',['first_discover_banner','second_discover_banner'])->pluck('value','key')->toArray();
+    public function discoverList()
+    {
+        $setting = Setting::whereIn('key', ['first_discover_banner', 'second_discover_banner'])->pluck('value', 'key')->toArray();
 
-        $setting['popular_services'] = Services::select('id','title','company_name','location','image','description','status')->withCount('business')->orderByDesc('business_count')->take(8)->get();
+        $setting['popular_services'] = Services::select('id', 'title', 'company_name', 'location', 'image', 'description', 'status')->withCount('business')->orderByDesc('business_count')->take(8)->get();
 
-        $setting['our_services'] = Services::select('id','title','company_name','location','image','description','status')->with('business:user_id')->whereHas('business',function($q){
-            $q->where('user_id',auth()->id());
-        })->where('status','Active')->get();       
-       
+        $setting['our_services'] = Services::select('id', 'title', 'company_name', 'location', 'image', 'description', 'status')->with('business:user_id')->whereHas('business', function ($q) {
+            $q->where('user_id', auth()->id());
+        })->where('status', 'Active')->get();
+
         return $this->sendResponse($setting, 'Discover-List Record Get SuccessFully.');
-    }   
+    }
 
-    public function serviceBusinessList($id){
-        $serviceBusiness =  Business::with('service:title')->whereHas('service',function($q) use($id){
+    public function serviceBusinessList($id)
+    {
+        $serviceBusiness = Business::with('service:title')->whereHas('service', function ($q) use ($id) {
             $q->where('id', base64_decode($id));
-        })->where('status','Active')->get();
+        })->where('status', 'Active')->get();
 
         return $this->sendResponse($serviceBusiness, 'Service Business Record Get SuccessFully.');
+    }
+
+    public function digitalServiceApply(DigitalServiceApplyRequest $request)
+    {
+        $validated = $request->validated();
+        ServiceApply::create($validated);
+        return $this->sendResponse([], 'Service Apply Send SuccessFully.');
     }
 }

@@ -98,9 +98,15 @@ Route::middleware(['auth:api'])->Group(function () {
     Route::apiResource('enquiry', EnquiryController::class)->only(['index', 'store', 'show']);
 
     // Business Rating And Review
-    Route::post('business/rating-review',[BusinessController::class,'ratingReview']);
+    Route::post('business/rating-review', [BusinessController::class, 'ratingReview']);
 
     // Discover List
-    Route::get('discover-list', [ServiceController::class,'discoverList']);
-    Route::get('service-business-list/{id}', [ServiceController::class,'serviceBusinessList']);
+    Route::get('discover-list', [ServiceController::class, 'discoverList']);
+    Route::get('service-business-list/{id}', [ServiceController::class, 'serviceBusinessList']);
+
+    // Digital Service Apply
+    Route::post('digital-service-apply', [ServiceController::class, 'digitalServiceApply']);
+
+    // SubScription Plan Purchase
+    Route::post('subscription-plan-purchase', [SubscriptionPlanController::class, 'subscriptionPlanPurchase']);
 });
