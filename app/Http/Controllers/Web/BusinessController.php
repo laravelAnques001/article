@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Common\AzureComponent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BusinessWebRequest;
+use App\Models\Aminity;
 use App\Models\Business;
 use App\Models\Services;
 use Illuminate\Http\Request;
@@ -30,7 +31,9 @@ class BusinessController extends Controller
     public function create()
     {
         $services = Services::whereNull('deleted_at')->where('status', 'Active')->orderByDesc('id')->get();
-        return view('Admin.Business.create', compact('services'));
+        $aminities = Aminity::whereNull('deleted_at')->orderByDesc('id')->get();
+        // dd($aminity);
+        return view('Admin.Business.create', compact('services', 'aminities'));
     }
 
     /**
@@ -43,17 +46,23 @@ class BusinessController extends Controller
     {
         $validated = $request->validated();
         $image_url = [];
-        foreach ($request->images as $image) {
-            $azure = new AzureComponent();
-            $mediaName = $azure->store($image);
-            $image_url[] = config('app.azure') . "/uploads/readwave/$mediaName";
+        if (is_array($request->images) || is_object($request->images)) {
+            foreach ($request->images as $image) {
+                $azure = new AzureComponent();
+                $mediaName = $azure->store($image);
+                $image_url[] = config('app.azure') . "/uploads/readwave/$mediaName";
+            }
         }
         $validated['images'] = implode(',', $image_url);
+        $validated['status'] = 'Approved';
         $servicesIds = $validated['service_id'];
+        $aminities = $validated['aminity_id'];
         unset($validated['service_id']);
+        unset($validated['aminity_id']);
         $validated['user_id'] = auth()->id();
         $business = Business::create($validated);
         $business->service()->attach($servicesIds);
+        $business->aminity()->attach($aminities);
         return redirect()->route('business.index')->with('success', 'Business Created SuccessFully.');
     }
 
@@ -82,7 +91,8 @@ class BusinessController extends Controller
         $business = Business::with('service')->whereNull('deleted_at')->find(base64_decode($id)) ?? abort(404);
         $images = explode(',', $business->images);
         $services = Services::whereNull('deleted_at')->where('status', 'Active')->orderByDesc('id')->get();
-        return view('Admin.Business.edit', compact('services', 'business', 'images'));
+        $aminities = Aminity::whereNull('deleted_at')->orderByDesc('id')->get();
+        return view('Admin.Business.edit', compact('services', 'business', 'images', 'aminities'));
     }
 
     /**
@@ -97,6 +107,8 @@ class BusinessController extends Controller
         $business = Business::with('service')->whereNull('deleted_at')->find(base64_decode($id)) ?? abort(404);
         $validated = $request->validated();
         unset($validated['service_id']);
+        unset($validated['aminity_id']);
+
         if (isset($request->images) ? $request->images : null) {
             $image_url = [];
             $azure = new AzureComponent();
@@ -116,6 +128,7 @@ class BusinessController extends Controller
         }
         $business->fill($validated)->save();
         $business->service()->sync($request->service_id);
+        $business->aminity()->sync($request->aminity_id);
         return redirect()->route('business.index')->with('success', 'Business Updated SuccessFully.');
     }
 
@@ -164,7 +177,7 @@ class BusinessController extends Controller
                 return $html;
             })
             ->editColumn('status', function ($data) {
-                $checked = ($data->status == 'Active') ? 'checked' : '';
+                $checked = ($data->status == 'Approved') ? 'checked' : '';
                 return '<input type="checkbox" id="switcherySize2"  data-value="' . base64_encode($data->id) . '"  class="switchery switch" data-size="sm" ' . $checked . '  />';
             })
             ->editColumn('user_id', function ($data) {

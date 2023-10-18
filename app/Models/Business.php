@@ -25,14 +25,21 @@ class Business extends Model
         'description',
         'images',
         'status',
+        'location',
+        'contact_number',
         'deleted_at',
     ];
 
-    protected $appends = ['rating', 'review', 'old_years', 'web_link'];
+    protected $appends = ['rating', 'review', 'old_years', 'web_link', 'image_list', 'is_promoted', 'promoted_tag'];
     // protected $casts = [
     //     'start_time' => 'datetime:H:i',
     //     'end_time' => 'datetime:H:i',
     // ];
+
+    protected $casts = [
+        'contact_number' => 'string',
+        'year' => 'string',
+    ];
 
     public function user()
     {
@@ -66,7 +73,7 @@ class Business extends Model
     public function getRatingAttribute()
     {
         $avg = $this->hasMany(BusinessRatingReview::class)->avg('rating');
-        return $avg ? number_format($avg, 2) : 0;
+        return $avg ? (float) number_format($avg, 2) : 0;
     }
 
     public function getReviewAttribute()
@@ -83,4 +90,40 @@ class Business extends Model
     {
         return route('businessView', base64_encode($this->id));
     }
+
+    // public function getContactNumberAttribute()
+    // {
+    //     return (string) $this->contact_number;
+    // }
+
+    public function subscriptionPlan()
+    {
+        return $this->hasOne(SubscriptionPlanPurchase::class, 'business_id');
+    }
+
+    // public function getSubscriptionPlanDate()
+    // {
+    //     // return $this->servicePurchase->latest();
+    // }
+
+    public function getImageListAttribute()
+    {
+        return $this->images ? explode(',', $this->images) : [];
+    }
+
+    public function aminity()
+    {
+        return $this->belongsToMany(Aminity::class, 'aminities_businesses');
+    }
+
+    public function getIsPromotedAttribute()
+    {
+        return false;
+    }
+
+    public function getPromotedTagAttribute()
+    {
+        return 'Top Rated';
+    }
+
 }

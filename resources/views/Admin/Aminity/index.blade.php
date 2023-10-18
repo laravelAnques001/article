@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ config('app.name') }} | Enquiry List
+    {{ env('APP_NAME') }} | Aminity List
 @endsection
 @push('custom-scripts')
     <!-- Theme JS files -->
@@ -41,13 +41,12 @@
                         'dropup');
                 }
             });
-
             $('.customer-table').DataTable({
                 "processing": true,
                 "serverSide": true,
                 "select": true,
                 "ajax": {
-                    "url": "{{ route('admin.enquiry.getData') }}",
+                    "url": "{{ route('admin.aminity.getData') }}",
                     "dataType": "json",
                     "type": "POST",
                     "data": {
@@ -63,22 +62,7 @@
                         "data": "id"
                     },
                     {
-                        "data": "user.name"
-                    },
-                    {
-                        "data": "business_name"
-                    },
-                    {
-                        "data": "keys"
-                    },
-                    {
                         "data": "name"
-                    },
-                    {
-                        "data": "email"
-                    },
-                    {
-                        "data": "mobile_number"
                     },
                     {
                         "data": "date"
@@ -113,7 +97,7 @@
                                 }).done(function(data) {
                                     swal({
                                         title: "Deleted!",
-                                        text: "Business Enquiry has been successfully deleted..",
+                                        text: "Aminity has been successfully deleted..",
                                         type: "success",
                                         showCancelButton: true,
                                         closeOnConfirm: false,
@@ -135,7 +119,56 @@
                         });
 
                 });
+                var i = 0;
+                if (Array.prototype.forEach) {
 
+                    var elems = $('.switchery');
+                    $.each(elems, function(key, value) {
+                        var $size = "",
+                            $color = "",
+                            $sizeClass = "",
+                            $colorCode = "";
+                        $size = $(this).data('size');
+                        var $sizes = {
+                            'lg': "large",
+                            'sm': "small",
+                            'xs': "xsmall"
+                        };
+                        if ($(this).data('size') !== undefined) {
+                            $sizeClass = "switchery switchery-" + $sizes[$size];
+                        } else {
+                            $sizeClass = "switchery";
+                        }
+
+                        $color = $(this).data('color');
+                        var $colors = {
+                            'primary': "#967ADC",
+                            'success': "#37BC9B",
+                            'danger': "#DA4453",
+                            'warning': "#F6BB42",
+                            'info': "#3BAFDA"
+                        };
+                        if ($color !== undefined) {
+                            $colorCode = $colors[$color];
+                        } else {
+                            $colorCode = "#37BC9B";
+                        }
+
+                        var switchery = new Switchery($(this)[0], {
+                            className: $sizeClass,
+                            color: $colorCode
+                        });
+                    });
+                } else {
+                    var elems1 = document.querySelectorAll('.switchery');
+                    for (i = 0; i < elems1.length; i++) {
+                        var $size = elems1[i].data('size');
+                        var $color = elems1[i].data('color');
+                        var switchery = new Switchery(elems1[i], {
+                            color: '#37BC9B'
+                        });
+                    }
+                }
             }
             $('.dataTables_length select').select2({
                 minimumResultsForSearch: Infinity,
@@ -151,12 +184,19 @@
         <div class="page-header">
             <div class="page-header-content">
                 <div class="page-title">
-                    <h4><span class="text-semibold">Business Enquiry list</span></h4>
+                    <h4><span class="text-semibold">Aminity list</span></h4>
+                </div>
+                <div class="heading-elements">
+                    <div class="heading-btn-group">
+                        <a href="{{ route('aminity.create') }}" class="btn btn-labeled-right bg-blue heading-btn">Create
+                            Aminity
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="breadcrumb-line breadcrumb-line-component">
                 <ul class="breadcrumb">
-                    <li>Business Enquiry list</li>
+                    <li>Aminity list</li>
                 </ul>
             </div>
         </div>
@@ -173,12 +213,7 @@
                                 <tr>
                                     <th>Action</th>
                                     <th>#</th>
-                                    <th>Author Name</th>
-                                    <th>Business Name</th>
-                                    <th>Keys</th>
                                     <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Mobile Number</th>
                                     <th>Created At</th>
                                 </tr>
                             </thead>

@@ -75,6 +75,18 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="short_description">Short Description:</label>
+                                    <div class="col-lg-9">
+                                        <input type="text" class="form-control" name="short_description"
+                                            id="short_description" placeholder="Enter short description"
+                                            value="{{ old('short_description', $services->short_description) }}">
+                                        @error('short_description')
+                                            <span class="error">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
                                     <label class="col-lg-3 control-label" for="image">Image:</label>
                                     <div class="col-lg-9">
                                         <input type="file" class="file-styled" name="image" id="image"

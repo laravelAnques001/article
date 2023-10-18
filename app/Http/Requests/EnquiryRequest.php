@@ -24,7 +24,8 @@ class EnquiryRequest extends FormRequest
     public function rules()
     {
         return [
-            'business_id' => 'required|exists:businesses,id',
+            'business_id' => 'required_without:keys|exists:businesses,id',
+            'keys' => 'required_without:business_id|string',
             'name' => 'required|string',
             'email' => 'required|email',
             'mobile_number' => 'required|digits_between:10,12',

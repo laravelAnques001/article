@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\EnquiryRequest;
 use App\Models\Enquiry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class EnquiryController extends Controller
 {
@@ -47,9 +47,21 @@ class EnquiryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(EnquiryRequest $request)
+    public function store(Request $request)
     {
-        $validated = $request->validated();
+        $validated = $request->all();
+        $validator = Validator::make($validated, [
+            'business_id' => 'required_without:keys|exists:businesses,id',
+            'keys' => 'required_without:business_id|string',
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'mobile_number' => 'required|digits_between:10,12',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+        }
+
         $enquiry = Enquiry::create($validated);
         return $this->sendResponse($enquiry->id, 'Enquiry Created Successfully.');
     }

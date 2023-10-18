@@ -8,6 +8,7 @@ use App\Http\Resources\WalletResource;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class WalletController extends Controller
 {
@@ -41,15 +42,27 @@ class WalletController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(WalletTransactionRequest $request)
+    // public function store(WalletTransactionRequest $request)
+    public function store(Request $request)
     {
         $userId = auth()->id();
-        $validated = $request->validated();       
-        if ($request->status == 'SUCCESS') {    
+        $validated = $request->all();
+        $validator = Validator::make($validated, [
+            'transaction_id' => 'required|string',
+            'payment_response' => 'required|string',
+            'status' => 'required|in:CANCEL,FAILURE,SUCCESS',
+            'amount' => 'required|regex:/^\d*(\.\d{2})?$/',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+        }
+
+        if ($request->status == 'SUCCESS') {
             $user = User::where('id', $userId)->first();
             $user->balance += $request->amount;
             $user->save();
-        }        
+        }
         $validated['user_id'] = $userId;
         $wallet = Wallet::create($validated);
         return $this->sendResponse($wallet->id, 'Wallet Created SuccessFully.');
@@ -78,14 +91,25 @@ class WalletController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(WalletTransactionRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $wallet = Wallet::whereNull('deleted_at')->find(base64_decode($id));
         if (!$wallet) {
             return $this->sendError('Record Not Found.');
         }
 
-        $validated = $request->validated();
+        $validated = $request->all();
+        $validator = Validator::make($validated, [
+            'transaction_id' => 'required|string',
+            'payment_response' => 'required|string',
+            'status' => 'required|in:CANCEL,FAILURE,SUCCESS',
+            'amount' => 'required|regex:/^\d*(\.\d{2})?$/',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+        }
+
         $wallet->fill($validated)->save();
         return $this->sendResponse([], 'Wallet Updated SuccessFully');
     }

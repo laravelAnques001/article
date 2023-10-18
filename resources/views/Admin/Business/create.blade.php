@@ -70,7 +70,7 @@
                                         <div class="col-lg-9">
                                             <select class="select js-example-placeholder-multiple border-2 form-control"
                                                 name="service_id[]" id="service_id" multiple>
-                                                <option value="">Select Service</option>
+                                                {{--  <option>Select Service</option>  --}}
                                                 @foreach ($services as $service)
                                                     <option value="{{ $service->id }}"
                                                         {{ old('service_id') == $service->id ? 'selected' : '' }}>
@@ -78,6 +78,24 @@
                                                 @endforeach
                                             </select>
                                             @error('service_id')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="aminity_id">Select Aminities:</label>
+                                        <div class="col-lg-9">
+                                            <select class="select js-example-placeholder-multiple border-2 form-control"
+                                                name="aminity_id[]" id="aminity_id" multiple>
+                                                {{--  <option>Select Service</option>  --}}
+                                                @foreach ($aminities as $aminity)
+                                                    <option value="{{ $aminity->id }}"
+                                                        {{ old('aminity_id') == $aminity->id ? 'selected' : '' }}>
+                                                        {{ $aminity->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('aminity_id')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -117,7 +135,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
+                                    {{--  <div class="form-group">
                                         <label class="col-lg-3 control-label" for="amenities">Amenities:</label>
                                         <div class="col-lg-9">
                                             <input type="text" class="form-control" name="amenities" id="amenities"
@@ -126,7 +144,7 @@
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                    </div>
+                                    </div>  --}}
 
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="website">Website:</label>

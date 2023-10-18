@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AdvertiseRequest;
 use App\Models\Advertise;
 use App\Models\AdvertiseLatLong;
 use App\Models\Article;
@@ -64,9 +63,27 @@ class AdvertiseController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(AdvertiseRequest $request)
+    // public function store(AdvertiseRequest $request)
+    public function store(Request $request)
     {
-        $validated = $request->validated();
+        $validated = $request->all();
+        $validator = Validator::make($validated, [
+            'locations' => 'nullable|string',
+            'redis' => 'nullable|numeric',
+            'budget' => 'nullable|numeric',
+            'budget_type' => 'nullable|in:0,1',
+            'ad_status' => 'nullable|in:0,1',
+            'start_date' => 'nullable|date_format:Y-m-d H:i:s',
+            'end_date' => 'nullable|date_format:Y-m-d H:i:s|after_or_equal:start_date',
+            'target' => 'required|in:0,1',
+            'article_id' => 'required|in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+        }
+
+        // $validated = $request->validated();
         $advertise = Advertise::create($validated);
         $locations = isset($request->locations) ? json_decode($request->locations) : null;
         if ($locations) {
@@ -107,13 +124,31 @@ class AdvertiseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(AdvertiseRequest $request, $id)
+    // public function update(AdvertiseRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $advertise = Advertise::whereNull('deleted_at')->find(base64_decode($id));
         if (!$advertise) {
             return $this->sendError('Record Not Found.');
         }
-        $validated = $request->validated();
+        $validated = $request->all();
+        $validator = Validator::make($validated, [
+            'locations' => 'nullable|string',
+            'redis' => 'nullable|numeric',
+            'budget' => 'nullable|numeric',
+            'budget_type' => 'nullable|in:0,1',
+            'ad_status' => 'nullable|in:0,1',
+            'start_date' => 'nullable|date_format:Y-m-d H:i:s',
+            'end_date' => 'nullable|date_format:Y-m-d H:i:s|after_or_equal:start_date',
+            'target' => 'nullable|in:0,1',
+            'article_id' => 'nullable|in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+        }
+
+        // $validated = $request->validated();
         $advertise->fill($validated)->save();
         $locations = isset($request->locations) ? json_decode($request->locations) : null;
         if ($locations) {
@@ -222,7 +257,7 @@ class AdvertiseController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
         }
 
         $article = isset($request->article_id) ? $request->article_id : 0;

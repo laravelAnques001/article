@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ArticleRequest;
 use App\Jobs\ArticleCreateFirebaseJob;
 use App\Mail\ArticleCreateAdminMail;
 use App\Models\Article;
@@ -29,7 +28,7 @@ class ArticleController extends Controller
         $trending = isset($request->trending) ? $request->trending : null;
 
         $articles = $this->commonArticle()->where('status', 'Approved');
-        
+
         if ($search) {
             $articlesData = $articles->where('title', 'like', '%' . $search . '%')
                 ->orWhere('tags', 'like', '%' . $search . '%')
@@ -157,16 +156,36 @@ class ArticleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ArticleRequest $request)
+    // public function store(ArticleRequest $request)
+    public function store(Request $request)
     {
-        $validated = $request->validated();
-        $categories = explode(',', $request->input('category_id'));
-        $validator = Validator::make(['category_id' => $categories], [
-            'category_id.*' => 'exists:categories,id',
+        $validated = $request->all();
+        $categories = array_filter((explode(',', $request->input('category_id'))), 'strlen');
+        $validated['category_id'] = $categories;
+        $validator = Validator::make($validated, [
+            'link' => 'nullable|string',
+            'tags' => 'nullable|string|min:3',
+            'description' => 'nullable|string|min:3',
+            'image_type' => 'nullable|in:0,1,2',
+            'media' => 'nullable|string',
+            'thumbnail' => 'nullable|string',
+            'status' => 'nullable|in:In-Review,Approved,Rejected',
+            'category_id.*' => 'required|exists:categories,id',
+            'title' => 'required|string',
         ]);
+
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
         }
+
+        // $validated = $request->validated();
+        // $categories = explode(',', $request->input('category_id'));
+        // $validator = Validator::make(['category_id' => $categories], [
+        //     'category_id.*' => 'exists:categories,id',
+        // ]);
+        // if ($validator->fails()) {
+        //     return response()->json(['errors' => $validator->errors()], 422);
+        // }
         unset($validated['category_id']);
         // $image = isset($validated['media']) ? $validated['media'] : null;
         // if ($image) {
@@ -214,27 +233,45 @@ class ArticleController extends Controller
         if ($article) {
             return $this->sendResponse($article, 'Article Record Get Successfully.');
         } else {
-            return $this->sendError('Record Not Found.');           
+            return $this->sendError('Record Not Found.');
         }
     }
 
-    public function update(ArticleRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $article = Article::whereNull('deleted_at')->find(base64_decode($id));
         if (!$article) {
             return $this->sendError('Record Not Found.');
         }
-        $validated = $request->validated();
-        if ($category_id = $request->category_id) {
-            $categories = explode(',', $category_id);
-            $validator = Validator::make(['category_id' => $categories], [
-                'category_id.*' => 'exists:categories,id',
-            ]);
-            if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
-            }
-            $article->category()->sync($categories);
+        $validated = $request->all();
+        $categories = array_filter((explode(',', $request->input('category_id'))), 'strlen');
+        $validated['category_id'] = $categories;
+        $validator = Validator::make($validated, [
+            'link' => 'nullable|string',
+            'tags' => 'nullable|string|min:3',
+            'description' => 'nullable|string|min:3',
+            'image_type' => 'nullable|in:0,1,2',
+            'media' => 'nullable|string',
+            'thumbnail' => 'nullable|string',
+            'status' => 'nullable|in:In-Review,Approved,Rejected',
+            'category_id.*' => 'nullable|exists:categories,id',
+            'title' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
         }
+        // $validated = $request->validated();
+        // if ($category_id = $request->category_id) {
+        //     $categories = explode(',', $category_id);
+        //     $validator = Validator::make(['category_id' => $categories], [
+        //         'category_id.*' => 'exists:categories,id',
+        //     ]);
+        //     if ($validator->fails()) {
+        //         return response()->json(['errors' => $validator->errors()], 422);
+        //     }
+        $article->category()->sync($categories);
+        // }
         unset($validated['category_id']);
 
         // $image = isset($validated['media']) ? $validated['media'] : null;
@@ -298,7 +335,7 @@ class ArticleController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
+            return response()->json(['success' => false, 'message' => $validated->errors()->first()]);
         }
 
         //article start
@@ -325,7 +362,7 @@ class ArticleController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
+            return response()->json(['success' => false, 'message' => $validated->errors()->first()]);
         }
 
         $articleLSI = ArticleLikeShare::where('user_id', auth()->id())->where('article_id', $request->article_id)->first();

@@ -35,6 +35,8 @@ class BusinessRequest extends FormRequest
             'people_search' => 'nullable|string',
             'description' => 'nullable|string',
             'images' => 'nullable|string',
+            'location' => 'nullable|string',
+            'contact_number' => 'nullable|digits_between:7,17',
         ];
     }
 }

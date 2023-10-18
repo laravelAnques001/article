@@ -16,6 +16,7 @@ class CreateServiceAppliesTable extends Migration
         Schema::create('service_applies', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('service_id');
+            $table->unsignedBigInteger('user_id');
             $table->string('name')->nullable();
             $table->string('email')->nullable();
             $table->string('mobile_number')->nullable();
@@ -23,6 +24,7 @@ class CreateServiceAppliesTable extends Migration
             $table->softDeletes();
             $table->timestamps();
             $table->foreign('service_id')->references('id')->on('services')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 

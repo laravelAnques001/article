@@ -13,6 +13,7 @@ class ServiceApply extends Model
 
     protected $fillable = [
         'service_id',
+        'user_id',
         'name',
         'mobile_number',
         'email',
@@ -22,6 +23,11 @@ class ServiceApply extends Model
 
     public function service()
     {
-        return $this->belongsTo(Services::class,'service_id');
+        return $this->belongsTo(Services::class, 'service_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

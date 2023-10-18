@@ -15,6 +15,7 @@ class Services extends Model
         'company_name',
         'location',
         'image',
+        'short_description',
         'description',
         'status',
         'deleted_at',
@@ -22,6 +23,7 @@ class Services extends Model
 
     protected $appends = [
         'image_url',
+        'is_applied',
     ];
 
     public function getImageUrlAttribute()
@@ -32,6 +34,16 @@ class Services extends Model
     public function business()
     {
         // return $this->hasMany(Business::class,'service_id');
-        return $this->belongsToMany(Business::class,'businesses_services');
+        return $this->belongsToMany(Business::class, 'businesses_services');
+    }
+
+    public function serviceApply()
+    {
+        return $this->hasMany(ServiceApply::class, 'service_id');
+    }
+
+    public function getIsAppliedAttribute()
+    {
+        return $this->serviceApply()->where('user_id', auth()->id())->first() ? true : false;
     }
 }

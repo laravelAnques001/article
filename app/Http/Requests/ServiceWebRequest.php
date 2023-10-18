@@ -28,6 +28,7 @@ class ServiceWebRequest extends FormRequest
             'company_name' => 'required|string',
             'location' => 'required|string',
             'image' => 'nullable|image',
+            'short_description' => 'nullable|string',
             'description' => 'nullable',
         ];
     }

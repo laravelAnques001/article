@@ -15,12 +15,12 @@ class CreateSubscriptionPlanPurchasesTable extends Migration
     {
         Schema::create('subscription_plan_purchases', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('service_id');
+            $table->unsignedBigInteger('subscription_plan_id');
             $table->unsignedBigInteger('business_id');
             $table->text('payment_response');
             $table->softDeletes();
             $table->timestamps();
-            $table->foreign('service_id')->references('id')->on('services')->cascadeOnDelete();
+            $table->foreign('subscription_plan_id')->references('id')->on('subscription_plans')->cascadeOnDelete();
             $table->foreign('business_id')->references('id')->on('businesses')->cascadeOnDelete();
         });
     }

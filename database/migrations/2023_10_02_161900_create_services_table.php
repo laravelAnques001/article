@@ -19,6 +19,7 @@ class CreateServicesTable extends Migration
             $table->string('company_name')->nullable();
             $table->string('location')->nullable();
             $table->string('image')->nullable();
+            $table->string('short_description')->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['Active', 'Deactive'])->default('Active');
             $table->softDeletes();

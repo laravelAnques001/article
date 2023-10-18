@@ -110,4 +110,10 @@ Route::middleware(['auth:api'])->Group(function () {
     // SubScription Plan Purchase
     Route::post('subscription-plan-purchase', [SubscriptionPlanController::class, 'subscriptionPlanPurchase']);
     Route::get('subscription-plan-history', [SubscriptionPlanController::class, 'subscriptionPlanHistory']);
+
+    // Aminity List
+    Route::get('aminities-list', [BusinessController::class, 'aminityList']);
+
+    // My Business List
+    Route::get('my-business-list', [BusinessController::class, 'myBusinessList']);
 });

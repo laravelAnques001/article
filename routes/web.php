@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\AdvertiseController;
+use App\Http\Controllers\Web\AminityController;
 use App\Http\Controllers\Web\ArticleController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\BusinessController;
@@ -77,6 +78,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('subscriptionPlan', SubscriptionPlanController::class);
     Route::resource('services', ServiceController::class);
     Route::resource('business', BusinessController::class);
+    Route::resource('aminity', AminityController::class);
 
     Route::get('article/{id}/{status}', [ArticleController::class, 'status'])->name('admin.article.status');
     Route::get('services/{id}/{status}', [ServiceController::class, 'status'])->name('admin.services.status');
@@ -96,6 +98,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('subscriptionPlan/getData', [SubscriptionPlanController::class, 'getData'])->name('admin.subscriptionPlan.getData');
     Route::post('services/getData', [ServiceController::class, 'getData'])->name('admin.services.getData');
     Route::post('business/getData', [BusinessController::class, 'getData'])->name('admin.business.getData');
+    Route::post('aminity/getData', [AminityController::class, 'getData'])->name('admin.aminity.getData');
 
     // Enquiry
     Route::post('enquiry/getData', [EnquiryController::class, 'getData'])->name('admin.enquiry.getData');

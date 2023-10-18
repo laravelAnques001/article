@@ -61,6 +61,15 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="service_id">Select Services:</label>
+                                    <div class="col-lg-9">
+                                        <p class="form-control">
+                                            {{ implode(', ', $business->aminity->pluck('name')->toArray()) }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
                                     <label class="col-lg-3 control-label" for="year">Year:</label>
                                     <div class="col-lg-9">
                                         <p class="form-control">{{ $business->year }}</p>
@@ -81,12 +90,12 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group">
+                                {{--  <div class="form-group">
                                     <label class="col-lg-3 control-label" for="amenities">Amenities:</label>
                                     <div class="col-lg-9">
                                         <p class="form-control">{{ $business->amenities }}</p>
                                     </div>
-                                </div>
+                                </div>  --}}
 
                                 <div class="form-group">
                                     <label class="col-lg-3 control-label" for="website">Website:</label>

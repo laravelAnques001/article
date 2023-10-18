@@ -47,7 +47,10 @@ class EnquiryController extends Controller
             ->addColumn('date', function ($data) {
                 return date('Y-m-d H:i:s', strtotime($data->created_at));
             })
-            ->rawColumns(['date', 'action'])
+            ->addColumn('business_name', function ($data) {
+                return isset($data->business->business_name) ? $data->business->business_name : null;
+            })
+            ->rawColumns(['date', 'action', 'business_name'])
             ->addIndexColumn()
             ->toJson();
     }

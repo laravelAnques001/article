@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SubscriptionPlanPurchaseRequests;
 use App\Models\SubscriptionPlan;
 use App\Models\SubscriptionPlanPurchase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SubscriptionPlanController extends Controller
 {
@@ -44,16 +44,26 @@ class SubscriptionPlanController extends Controller
         return $this->sendError('Record Not Found.');
     }
 
-    public function subscriptionPlanPurchase(SubscriptionPlanPurchaseRequests $request)
+    public function subscriptionPlanPurchase(Request $request)
     {
-        $validated = $request->validated();
+        $validated = $request->all();
+        $validator = Validator::make($validated, [
+            'business_id' => 'required|exists:businesses,id',
+            'subscription_plan_id' => 'required|exists:subscription_plans,id',
+            'payment_response' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+        }
+
         SubscriptionPlanPurchase::create($validated);
         return $this->sendResponse([], 'Subscription Plan Purchase Record Store SuccessFully.');
     }
 
     public function subscriptionPlanHistory()
     {
-        $spHistory = SubscriptionPlanPurchase::select('id','service_id','business_id','payment_response')->with('business', 'service')->whereHas('business', function ($q) {
+        $spHistory = SubscriptionPlanPurchase::select('id', 'subscription_plan_id', 'business_id', 'payment_response')->with('business', 'subscriptionPlan')->whereHas('business', function ($q) {
             $q->where('user_id', auth()->id());
         })->whereNull('deleted_at')
             ->get();

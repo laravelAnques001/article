@@ -196,11 +196,11 @@
 
                 $(".switch").change(function() {
                     var id = $(this).attr("data-value");
-                    var state = 'Deactive';
+                    var state = 'Pending';
                     if ($(this).prop("checked") == true) {
-                        state = 'Active';
+                        state = 'Approved';
                     } else if ($(this).prop("checked") == false) {
-                        state = 'Deactive';
+                        state = 'Rejected';
                     }
                     var url = "{{ URL::to('business') }}";
                     url = url + "/" + id + "/" + state;
@@ -208,10 +208,10 @@
                         url: url,
                     }).done(function(data) {
                         if (data == 1) {
-                            if (state == 'Active') {
-                                toastr.success('Business has been Active', 'Activated');
+                            if (state == 'Approved') {
+                                toastr.success('Business has been Approved', 'Activated');
                             } else {
-                                toastr.error('Business has been Deactive', 'Deactivated');
+                                toastr.error('Business has been Rejected', 'Deactivated');
                             }
                         } else {
                             toastr.error('Something went wrong..', 'Error');
@@ -271,7 +271,7 @@
                                     <th>Image</th>
                                     <th>Rating</th>
                                     <th>Review</th>
-                                    <th>Status<br><small style="font-size: 70%;">(On=Approved,Off=In-Review)</small></th>
+                                    <th>Status<br><small style="font-size: 70%;">(On=Approved,Off=Rejected)</small></th>
                                     <th>Created At</th>
                                 </tr>
                             </thead>

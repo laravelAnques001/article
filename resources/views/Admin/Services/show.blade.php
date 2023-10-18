@@ -59,6 +59,13 @@
                             </div>
 
                             <div class="form-group">
+                                <label class="col-lg-3 control-label">Short Description:</label>
+                                <div class="col-lg-9">
+                                    <p class="col-lg-3">{{ $services->short_description ?? '' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
                                 <label class="col-lg-3 control-label">Image:</label>
                                 <div class="col-lg-9">
                                     <div class="col-lg-9">

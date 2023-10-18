@@ -26,7 +26,9 @@ class CreateBusinessesTable extends Migration
             $table->text('people_search')->nullable();
             $table->text('images')->nullable();
             $table->text('description')->nullable();
-            $table->enum('status', ['Active', 'Deactive'])->default('Active');
+            $table->enum('status', ['Pending', 'Approved', 'Rejected'])->default('Pending');
+            $table->string('location')->nullable();
+            $table->bigInteger('contact_number')->nullable();
             $table->softDeletes();
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();

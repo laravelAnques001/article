@@ -26,7 +26,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string',
             'type' => 'required|in:email,mobile_number',
-            'email' => ['required_if:type,email', 'string', 'email', 'unique:users,email'],
+            'email' => ['required_if:type,email', 'string', 'exists:users,email'],
             'mobile_number' => ['required_if:type,mobile_number', 'digits_between:10,12'],
             'dial_code' => 'nullable|digits_between:1,4',
             'user_type' => 'required|in:Regular,Business',

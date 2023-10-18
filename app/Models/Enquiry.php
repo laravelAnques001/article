@@ -13,6 +13,7 @@ class Enquiry extends Model
 
     protected $fillable = [
         'business_id',
+        'keys',
         'user_id',
         'name',
         'email',
