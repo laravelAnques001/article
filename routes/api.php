@@ -90,12 +90,19 @@ Route::middleware(['auth:api'])->Group(function () {
     Route::get('services/{id}', [ServiceController::class, 'show']);
 
     // Business
-    Route::apiResource('business', BusinessController::class)->only(['index', 'store', 'show', 'destroy']);
+    // Route::apiResource('business', BusinessController::class)->only(['index', 'store', 'show', 'destroy']);
+    Route::get('business', [BusinessController::class, 'index']);
+    Route::post('business', [BusinessController::class, 'store']);
+    Route::get('business/{business}', [BusinessController::class, 'show']);
+    Route::delete('business/{business}', [BusinessController::class, 'destroy']);
     Route::post('edit-business/{business}', [BusinessController::class, 'update']);
     Route::get('business/rating-review-list/{id}', [BusinessController::class, 'ratingReviewList']);
 
     // Enquiry
-    Route::apiResource('enquiry', EnquiryController::class)->only(['index', 'store', 'show']);
+    // Route::apiResource('enquiry', EnquiryController::class)->only(['index', 'store', 'show']);
+    Route::get('enquiry', [EnquiryController::class, 'index']);
+    Route::post('enquiry', [EnquiryController::class, 'store']);
+    Route::get('enquiry/{enquiry}', [EnquiryController::class, 'show']);
 
     // Business Rating And Review
     Route::post('business/rating-review', [BusinessController::class, 'ratingReview']);

@@ -84,7 +84,7 @@ class BusinessController extends Controller
         if ($business) {
             return $this->sendResponse($business, 'Business Record Get Successfully.');
         }
-        return $this->sendError('Record Not Found.');
+        return $this->sendError('Record Not Found.', [], 200);
     }
 
     /**
@@ -155,7 +155,7 @@ class BusinessController extends Controller
         if ($business) {
             return $this->sendResponse($business, 'Business Record Get Successfully.');
         }
-        return $this->sendError('Record Not Found.');
+        return $this->sendError('Record Not Found.', [], 200);
     }
 
     /**
@@ -169,7 +169,7 @@ class BusinessController extends Controller
     {
         $business = Business::whereNull('deleted_at')->find(base64_decode($id));
         if (!$business) {
-            return $this->sendError('Record Not Found.');
+            return $this->sendError('Record Not Found.', [], 200);
         }
         $validated = $request->all();
         $services = array_filter((explode(',', $request->input('service_id'))), 'strlen');
@@ -222,7 +222,7 @@ class BusinessController extends Controller
             $business->fill(['deleted_at' => now()])->save();
             return $this->sendResponse([], 'Business Deleted Successfully.');
         }
-        return $this->sendError('Record Not Found.');
+        return $this->sendError('Record Not Found.', [], 200);
     }
 
     // public function ratingReview(BusinessRatingReviewRequest $request)
@@ -234,7 +234,7 @@ class BusinessController extends Controller
                 'rating' => ['nullable', 'numeric', 'between:0.01,5', 'regex:/^\d+(\.\d{2})?$/'],
                 'review' => 'nullable|string',
             ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
         }
@@ -306,7 +306,7 @@ class BusinessController extends Controller
                 ->orWhere('people_search', 'like', '%' . $search . '%')
                 ->orderByDesc('id')
                 ->paginate(10);
-              
+
         } else {
             $business = Business::select('id', 'user_id', 'business_name', 'gst_number', 'year', 'start_time', 'end_time', 'website', 'people_search', 'description', 'images', 'status', 'location', 'contact_number')
                 ->with('ratingReview')

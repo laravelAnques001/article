@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Dashboard
+    {{ config('app.name') }} | Dashboard
 @endsection
 @section('content')
     <div class="container">

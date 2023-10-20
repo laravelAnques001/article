@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Category show
+    {{ config('app.name') }} | Category show
 @endsection
 @section('content')
     <!-- Page header -->

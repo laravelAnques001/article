@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Aminity Update
+    {{ config('app.name') }} | Aminity Update
 @endsection
 @section('content')
     <!-- Page header -->

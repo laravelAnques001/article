@@ -21,13 +21,13 @@ class SubscriptionPlanController extends Controller
                 ->whereNull('deleted_at')
                 ->where('status', 'Active')
                 ->orderByDesc('id')
-                ->paginate(10);
+                ->get();
         } else {
             $subscriptionPlan = SubscriptionPlan::select('id', 'name', 'time_period', 'price', 'description', 'status')
                 ->whereNull('deleted_at')
                 ->where('status', 'Active')
                 ->orderByDesc('id')
-                ->paginate(10);
+                ->get();
         }
         return $this->sendResponse($subscriptionPlan, 'Subscription Plan List Get Successfully.');
     }
@@ -51,6 +51,7 @@ class SubscriptionPlanController extends Controller
             'business_id' => 'required|exists:businesses,id',
             'subscription_plan_id' => 'required|exists:subscription_plans,id',
             'payment_response' => 'required|string',
+            'transaction_id' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -63,9 +64,17 @@ class SubscriptionPlanController extends Controller
 
     public function subscriptionPlanHistory()
     {
-        $spHistory = SubscriptionPlanPurchase::select('id', 'subscription_plan_id', 'business_id', 'payment_response')->with('business', 'subscriptionPlan')->whereHas('business', function ($q) {
-            $q->where('user_id', auth()->id());
-        })->whereNull('deleted_at')
+        $spHistory = SubscriptionPlanPurchase::select('id', 'subscription_plan_id', 'business_id', 'transaction_id', 'payment_response')
+            ->with(['subscriptionPlan' => function ($q) {
+                $q->select('id', 'name', 'time_period', 'price', 'description', 'status');
+            }])
+            ->with(['business' => function ($q) {
+                $q->select('id', 'business_name');
+            }])
+            ->whereHas('business', function ($q) {
+                $q->where('user_id', auth()->id());
+            })
+            ->whereNull('deleted_at')
             ->get();
 
         return $this->sendResponse($spHistory, 'Subscription Plan History Get SuccessFully.');

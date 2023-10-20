@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Subscription Plans show
+    {{config('app.name') }} | Subscription Plans show
 @endsection
 @section('content')
     <!-- Page header -->

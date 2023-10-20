@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Common\GeneralComponent;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\Business;
 use App\Models\Setting;
 use App\Models\User;
-use App\Notifications\SendOTPEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Common\GeneralComponent;
+
 class AuthController extends Controller
 {
     public $general;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->general = new GeneralComponent();
     }
-
 
     public function register(Request $request)
     {
@@ -30,7 +30,7 @@ class AuthController extends Controller
             'mobile_number' => ['required_if:type,mobile_number', 'digits_between:10,12'],
             'dial_code' => 'nullable|digits_between:1,4',
             'user_type' => 'required|in:Regular,Business',
-            'business_name' => ['required_if:user_type,Business', 'string','unique:businesses,business_name'],
+            // 'business_name' => ['required_if:user_type,Business', 'string', 'unique:businesses,business_name'],
         ]);
 
         // if ($request->type == 'mobile_number') {
@@ -40,7 +40,17 @@ class AuthController extends Controller
         // }
 
         if ($validator->fails()) {
-            return response()->json(['success' => false,'message' => $validator->errors()->first()]);
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+        }
+
+        if ($request->user_type == 'Business') {
+            $validator = Validator::make($request->all(), [
+                'business_name' => ['required', 'string', 'unique:businesses,business_name'],
+            ]);
+        }
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
         }
 
         $input = $request->all();
@@ -55,22 +65,26 @@ class AuthController extends Controller
             $user = User::where('email', $email)->first();
             unset($input['email']);
             if (!$user) {
-                return $this->sendError('Email Not Valid');
+                return $this->sendError('Email Not Valid', [], 200);
             }
         } elseif ($request->type == 'mobile_number') {
             $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->first();
             unset($input['mobile_number']);
             unset($input['dial_code']);
             if (!$user) {
-                return $this->sendError('Mobile Number Not Valid');
+                return $this->sendError('Mobile Number Not Valid', [], 200);
             }
         }
         $user->fill($input)->save();
-        $business = Business::create([
-            'business_name' => $business_name,
-            'user_id' => $user->id,
-        ]);
-        return $this->sendResponse([], 'User register successfully.');
+
+        if ($business_name) {
+            $business = Business::create([
+                'business_name' => $business_name,
+                'user_id' => $user->id,
+            ]);
+            return $this->sendResponse(['business_id' => $business->id, 'business_name' => $business_name, 'business_profile' => false], 'User register successfully.');
+        }
+        return $this->sendResponse(['business_id' => -1, 'business_name' => '', 'business_profile' => true], 'User register successfully.');
     }
 
     public function login(Request $request)
@@ -82,7 +96,7 @@ class AuthController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
+            return response()->json(['success' => false, 'message' => $validated->errors()->first()]);
         }
 
         $dial_code = isset($request->dial_code) ? $request->dial_code : 91;
@@ -90,24 +104,29 @@ class AuthController extends Controller
         $email = isset($request->email) ? $request->email : null;
 
         // user OTP Genrate And Send start
-        if(env('APP_ENV') == 'local'){
-            $userOtp = 1234;
-            $response = 200;
-        }else{
+        if (config('app.env') == 'live') {
             $userOtp = rand(1000, 9999);
             if ($mobile_number && $dial_code) {
                 // sms send start
-                $msgResponse =  $this->general->sendSMSOtp($userOtp, $request->mobile_number);
-                return $this->sendResponse(json_decode($msgResponse)->code,$userOtp );
+                $msgResponse = $this->general->sendSMSOtp($userOtp, $request->mobile_number);
+                $msgResponseDecode = json_decode($msgResponse);
+                $response = $msgResponseDecode->code;
                 // sms send end
-            }else{
+            } else {
                 $response = 200;
             }
+        } else {
+            $userOtp = 1234;
+            $response = 200;
+        }
+        //temp
+        if ($email) {
+            $userOtp = 1234;
         }
         $expire_at = now()->addMinute(10);
         // user OTP Genrate And Send end
 
-        if($response == 200){
+        if ($response == 200) {
             if ($email) {
                 $user = User::where('email', $email)->first();
                 if ($user) {
@@ -122,7 +141,7 @@ class AuthController extends Controller
                         'expire_at' => $expire_at,
                     ]);
                 }
-                $user->notify(new SendOTPEmail($userOtp));
+                // $user->notifyNow(new SendOTPEmail($userOtp));
                 return $this->sendResponse(null, 'Your Email OTP Send SuccessFully');
             }
 
@@ -144,7 +163,7 @@ class AuthController extends Controller
                 return $this->sendResponse(null, 'Your Mobile Number OTP Send SuccessFully');
             }
         }
-        return $this->sendError('Server Issue OTP Not Send');
+        return $this->sendError('Server Issue OTP Not Send', [], 200);
     }
 
     // public function otpGenerate(Request $request)
@@ -182,7 +201,7 @@ class AuthController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
+            return response()->json(['success' => false, 'message' => $validated->errors()->first()]);
         }
         $dial_code = isset($request->dial_code) ? $request->dial_code : 91;
         $mobile_number = isset($request->mobile_number) ? $request->mobile_number : null;
@@ -192,13 +211,13 @@ class AuthController extends Controller
         if ($email) {
             $user = User::where('email', $email)->where('otp', $request->otp)->whereNotNull('expire_at')->where('expire_at', '>=', now())->first();
             if (!$user) {
-                return $this->sendError('OTP not valid!');
+                return $this->sendError('OTP not valid!', [], 200);
             }
         }
         if ($mobile_number && $dial_code) {
             $user = User::where('dial_code', $dial_code)->where('mobile_number', $mobile_number)->whereNotNull('expire_at')->where('expire_at', '>=', now())->where('otp', $request->otp)->first();
             if (!$user) {
-                return $this->sendError('OTP not valid!');
+                return $this->sendError('OTP not valid!', [], 200);
             }
         }
         if ($user) {
@@ -227,7 +246,7 @@ class AuthController extends Controller
             $success['business_profile'] = $business_profile;
             return $this->sendResponse($success, 'User Login Successfully.');
         }
-        return $this->sendError('Email Or Mobile Number Field Required');
+        return $this->sendError('Email Or Mobile Number Field Required', [], 200);
     }
 
     public function logout(Request $request)
@@ -236,7 +255,7 @@ class AuthController extends Controller
         if ($result) {
             return $this->sendResponse([], 'User Logout Successfully.', 200);
         } else {
-            return $this->sendError('Something Is Wrong.');
+            return $this->sendError('Something Is Wrong.', [], 200);
         }
     }
 
@@ -272,7 +291,7 @@ class AuthController extends Controller
         ]);
 
         if ($validated->fails()) {
-            return response()->json(['success' => false,'message' => $validated->errors()->first()]);
+            return response()->json(['success' => false, 'message' => $validated->errors()->first()]);
         }
         $validated = $request->all();
         $user = User::with('business')->find($userId);
@@ -304,7 +323,7 @@ class AuthController extends Controller
         if ($setting) {
             return $this->sendResponse($setting->value, 'Setting Data get SuccessFully.');
         }
-        return $this->sendError('Key not valid');
+        return $this->sendError('Key not valid', [], 200);
 
     }
 }

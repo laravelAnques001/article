@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Article Update
+    {{ config('app.name') }} | Article Update
 @endsection
 @section('content')
     <div>

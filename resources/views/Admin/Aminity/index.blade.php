@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Aminity List
+    {{ config('app.name') }} | Aminity List
 @endsection
 @push('custom-scripts')
     <!-- Theme JS files -->

@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Wallet Create
+    {{ config('app.name') }} | Wallet Create
 @endsection
 @section('content')
     <div>

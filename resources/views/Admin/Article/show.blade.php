@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Article Show
+    {{ config('app.name') }} | Article Show
 @endsection
 @section('content')
     <div>

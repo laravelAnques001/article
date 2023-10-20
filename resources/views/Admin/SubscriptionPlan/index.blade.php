@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Subscription Plan List
+    {{ config('app.name') }} | Subscription Plan List
 @endsection
 @push('custom-scripts')
     <!-- Theme JS files -->

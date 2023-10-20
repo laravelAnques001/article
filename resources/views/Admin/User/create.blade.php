@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | User Create
+    {{ config('app.name') }} | User Create
 @endsection
 @section('content')
     <!-- Page header -->

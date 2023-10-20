@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Services show
+    {{ config('app.name') }} | Services show
 @endsection
 @section('content')
     <!-- Page header -->

@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Services Update
+    {{ config('app.name') }} | Services Update
 @endsection
 @section('content')
     <!-- Page header -->
@@ -90,8 +90,8 @@
                                     <label class="col-lg-3 control-label" for="image">Image:</label>
                                     <div class="col-lg-9">
                                         <input type="file" class="file-styled" name="image" id="image"
-                                            value="{{ old('image') }}">
-                                        <span class="help-block">Accepted formats: gif, png, jpg. Max file size 2Mb</span>
+                                            value="{{ old('image') }}" accept="image/*">
+                                        {{--  <span class="help-block">Accepted formats: gif, png, jpg. Max file size 2Mb</span>  --}}
                                         <img src="{{ $services->image_url }}" alt="Services Image" width="100"
                                             height="100">
                                         @error('image')

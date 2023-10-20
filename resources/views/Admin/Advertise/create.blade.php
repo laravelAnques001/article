@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Advertise Create
+    {{ config('app.name') }} | Advertise Create
 @endsection
 @section('content')
     <div>

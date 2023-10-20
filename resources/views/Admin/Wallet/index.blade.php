@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | Wallet List
+    {{ config('app.name') }} | Wallet List
 @endsection
 @push('custom-scripts')
     <!-- Theme JS files -->

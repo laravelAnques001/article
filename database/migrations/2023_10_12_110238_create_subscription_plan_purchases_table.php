@@ -18,6 +18,7 @@ class CreateSubscriptionPlanPurchasesTable extends Migration
             $table->unsignedBigInteger('subscription_plan_id');
             $table->unsignedBigInteger('business_id');
             $table->text('payment_response');
+            $table->string('transaction_id')->nullable();
             $table->softDeletes();
             $table->timestamps();
             $table->foreign('subscription_plan_id')->references('id')->on('subscription_plans')->cascadeOnDelete();

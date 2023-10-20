@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | User Update
+    {{ config('app.name') }} | User Update
 @endsection
 @section('content')
     <!-- Page header -->

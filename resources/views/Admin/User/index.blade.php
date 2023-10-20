@@ -1,6 +1,6 @@
 @extends('Admin.layouts.common')
 @section('title')
-    {{ env('APP_NAME') }} | User List
+    {{ config('app.name') }} | User List
 @endsection
 @push('custom-scripts')
     <!-- Theme JS files -->
