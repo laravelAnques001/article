@@ -11,6 +11,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Notifications\SendOTPEmail;
+use App\Jobs\SendEmail;
 
 class AuthController extends Controller
 {
@@ -104,8 +106,8 @@ class AuthController extends Controller
         $email = isset($request->email) ? $request->email : null;
 
         // user OTP Genrate And Send start
+        $userOtp = rand(1000, 9999);
         if (config('app.env') == 'live') {
-            $userOtp = rand(1000, 9999);
             if ($mobile_number && $dial_code) {
                 // sms send start
                 $msgResponse = $this->general->sendSMSOtp($userOtp, $request->mobile_number);
@@ -120,9 +122,9 @@ class AuthController extends Controller
             $response = 200;
         }
         //temp
-        if ($email) {
-            $userOtp = 1234;
-        }
+        // if ($email) {
+        //     $userOtp = 1234;
+        // }
         $expire_at = now()->addMinute(10);
         // user OTP Genrate And Send end
 
@@ -142,6 +144,12 @@ class AuthController extends Controller
                     ]);
                 }
                 // $user->notifyNow(new SendOTPEmail($userOtp));
+                SendEmail::dispatchSync( [
+                    'subject' => 'Send OTP '.config('app.name'),
+                    'data' => ['otp'=>$userOtp],
+                    'email' => $email,
+                    'view' => 'OTPEmail',
+                ]);
                 return $this->sendResponse(null, 'Your Email OTP Send SuccessFully');
             }
 
@@ -227,7 +235,7 @@ class AuthController extends Controller
                 'device_token' => $device_token,
             ])->save();
 
-            $business = Business::where('user_id', $user->id)->whereNull('gst_number')->latest()->first();
+            $business = Business::where('user_id', $user->id)->whereNull('contact_number')->whereNull('location')->latest()->first();
             $business_profile = isset($business) ? false : true;
             $business_id = isset($business->id) ? $business->id : 0;
             $business_name = isset($business->business_name) ? $business->business_name : null;

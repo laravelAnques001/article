@@ -1,5 +1,5 @@
-<p>Article Title : {{ $article->title }}</p>
-<p>Article Tags : {{ $article->tags }}</p>
-<p>Article Link : {{ $article->link }}</p>
-<p>Article Status : {{ $article->status }}</p>
-<p>Article Description : {{ $article->description }}</p>
+<p>Article Title : {{ $data['title'] }}</p>
+<p>Article Tags : {{ $data['tags'] }}</p>
+<p>Article Link : {{ $data['link'] }}</p>
+<p>Article Status : In-Review </p>
+<p>Article Description : {{ $data['description'] }}</p>

@@ -6,8 +6,10 @@ use App\Common\AzureComponent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticleWebRequest;
 use App\Jobs\ArticleCreateFirebaseJob;
+use App\Jobs\ArticleApproveFirebase;
 use App\Mail\ArticleApprovedUserMail;
 use App\Models\Article;
+use App\Models\AdminNotification;
 use App\Models\ArticleNotification;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -64,10 +66,16 @@ class ArticleController extends Controller
         $article = Article::create($validated);
         $article->category()->attach($request->category_id);
 
-        dispatch(new ArticleCreateFirebaseJob($article));
+        // dispatch(new ArticleCreateFirebaseJob($article));
+        ArticleCreateFirebaseJob::dispatchSync($article);
 
         ArticleNotification::create([
             'article_id' => $article->id,
+        ]);
+
+        AdminNotification::create([
+            'title'=>'Article:'. $validated['title'],
+            'description'=>$validated['description'],
         ]);
 
         return redirect()->route('article.index')->with('success', 'Article Created SuccessFully.');
@@ -223,6 +231,7 @@ class ArticleController extends Controller
     {
         $article = Article::where('id', base64_decode($id))->update(['status' => $status]);
         if ($article) {
+            ArticleApproveFirebase::dispatchSync($article);
             echo 1;
         } else {
             echo 0;

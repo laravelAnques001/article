@@ -3,7 +3,7 @@
     <div class="navbar-header navbar-header-color">
         <a class="navbar-brand navbar-brand-header" href="#">
             {{--  <img src="{{ asset('assets/images/readwave_banner.png') }}" alt="">  --}}
-            <img src="{{ asset('assets/images/business_banner.png') }}" alt="">
+            <img src="{{ asset('assets/images/businessflipsbanner.jpeg') }}" alt="" width="200">
         </a>
 
         <ul class="nav navbar-nav visible-xs-block">

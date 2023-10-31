@@ -5,7 +5,7 @@
         <div class="panel panel-body login-form">
 
             <div class="text-center">
-                <div><img src="{{ asset('assets/images/logo.jpg') }}" alt="" width="250" height="125"></div>
+                <div><img src="{{ asset('assets/images/businessflipsbanner.jpeg') }}" alt="" width="250" height="150"></div>
                 <h5 class="content-group">Login to your account <small class="display-block">Enter your
                         credentials below</small></h5>
             </div>

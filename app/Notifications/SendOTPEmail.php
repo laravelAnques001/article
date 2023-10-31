@@ -40,8 +40,9 @@ class SendOTPEmail extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        $appName = config('app.name');
         return (new MailMessage)
-            ->line('Welcome To Friends Point Article.')
+            ->line("Welcome To $appName.")
             ->line('OTP:'.$this->otp)
             ->line('Thank you for using our application!');
     }

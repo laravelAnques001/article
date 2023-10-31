@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\ArticleCreateFirebaseJob;
+use App\Jobs\SendEmail;
 use App\Mail\ArticleCreateAdminMail;
 use App\Models\Article;
 use App\Models\ArticleLikeShare;
+use App\Models\AdminNotification;
 use App\Models\ArticleNotification;
 use App\Models\CategoryUser;
 use Illuminate\Http\Request;
@@ -204,12 +206,24 @@ class ArticleController extends Controller
         // }
         $article = Article::create($validated);
         $article->category()->attach($categories);
-        dispatch(new ArticleCreateFirebaseJob($article));
+        // dispatch(new ArticleCreateFirebaseJob($article));
+        ArticleCreateFirebaseJob::dispatchSync($article);
         ArticleNotification::create([
             'article_id' => $article->id,
         ]);
         // Notification::send(null, new SendPushNotification($request->title, $article, $fcmTokens));
-        Mail::to(config('mail.from.address'))->send(new ArticleCreateAdminMail($article));
+        // Mail::to(config('mail.from.address'))->send(new ArticleCreateAdminMail($article));
+        SendEmail::dispatchSync( [
+            'subject' => 'Article Create : '.$request->title,
+            'data' => ['title'=>$article->title,'tags'=>$article->tags,'link'=>$article->link,'description'=>$article->status],
+            'email' => config('mail.from.address'),
+            'view' => 'article_admin',
+        ]);
+
+        AdminNotification::create([
+            'title'=>'Article:'. $validated['title'],
+            'description'=>$validated['description'],
+        ]);
 
         return $this->sendResponse($article->id, 'Article Created Successfully.');
     }
@@ -233,7 +247,7 @@ class ArticleController extends Controller
         if ($article) {
             return $this->sendResponse($article, 'Article Record Get Successfully.');
         } else {
-            return $this->sendError('Record Not Found.');
+            return $this->sendError('Record Not Found.', [], 200);
         }
     }
 
@@ -241,7 +255,7 @@ class ArticleController extends Controller
     {
         $article = Article::whereNull('deleted_at')->find(base64_decode($id));
         if (!$article) {
-            return $this->sendError('Record Not Found.');
+            return $this->sendError('Record Not Found.', [], 200);
         }
         $validated = $request->all();
         $categories = array_filter((explode(',', $request->input('category_id'))), 'strlen');
@@ -322,7 +336,7 @@ class ArticleController extends Controller
             $article->fill(['deleted_at' => now()])->save();
             return $this->sendResponse([], 'Article Deleted Successfully.');
         } else {
-            return $this->sendError('Record Not Found.');
+            return $this->sendError('Record Not Found.', [], 200);
         }
     }
 

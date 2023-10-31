@@ -35,12 +35,12 @@
                     </li>  --}}
 
                     <li class="{{ Route::currentRouteName() == 'subscriptionPlan.*' ? 'active' : '' }}"><a
-                            href="{{ route('subscriptionPlan.index') }}"><i class="fa fa-bell"></i>
+                            href="{{ route('subscriptionPlan.index') }}"><i class="fa fa-tasks"></i>
                             <span>Subscription Plan</span></a>
                     </li>
 
                     <li class="{{ Route::currentRouteName() == 'aminity.*' ? 'active' : '' }}"><a
-                            href="{{ route('aminity.index') }}"><i class="fa fa-bell"></i>
+                            href="{{ route('aminity.index') }}"><i class="fa fa-hotel"></i>
                             <span>Aminity</span></a>
                     </li>
 
@@ -53,7 +53,7 @@
                             </li>
 
                             <li class="{{ Route::currentRouteName() == 'digitalServiceApply.*' ? 'active' : '' }}"><a
-                                    href="{{ route('digitalServiceApply.index') }}"><i class="fa fa-briefcase"></i>
+                                    href="{{ route('digitalServiceApply.index') }}"><i class="fa fa-bullhorn"></i>
                                     <span>Digital Service Apply</span></a>
                             </li>
                         </ul>
@@ -67,7 +67,7 @@
                                     <span>Business List</span></a>
                             </li>
                             <li class="{{ Route::currentRouteName() == 'enquiry.*' ? 'active' : '' }}"><a
-                                    href="{{ route('enquiry.index') }}"><i class="fa fa-briefcase"></i>
+                                    href="{{ route('enquiry.index') }}"><i class="fa fa-question-circle-o"></i>
                                     <span>Business Enquiry</span></a>
                             </li>
                         </ul>
