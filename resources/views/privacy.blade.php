@@ -170,6 +170,6 @@
         <p>Contact Us</p>
 
         <p>If you have any questions or suggestions about our Privacy Policy, please don&rsquo;t hesitate to contact us by
-            support@eleganceme.info</p>
+            <a href="https://mail.google.com/">service@businessflip.in</a></p>
     </div>
 @endsection

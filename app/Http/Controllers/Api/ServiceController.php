@@ -9,6 +9,9 @@ use App\Models\Services;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Jobs\SendEmail;
+use App\Models\AdminNotification;
+
 
 class ServiceController extends Controller
 {
@@ -126,11 +129,26 @@ class ServiceController extends Controller
             'email' => 'required|email',
             'message' => 'nullable|string',
         ]);
+
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
         }
+        
         $validated['user_id'] = auth()->id();
         ServiceApply::create($validated);
+
+        // SendEmail::dispatchSync( [
+        //     'subject' => 'Service Apply : '.$request->name,
+        //     'data' => $validated,
+        //     'email' => config('mail.from.address'),
+        //     'view' => 'ServiceAdmin',
+        // ]);
+        js_send_email( 'Service Apply : '.$request->name,  $validated,  config('mail.from.address'),'ServiceAdmin');
+
+        AdminNotification::create([
+            'title'=>'Enquiry:'. $validated['name'],
+            'description'=>$validated['message'],
+        ]);
         return $this->sendResponse([], 'Service Apply Send SuccessFully.');
     }
 }

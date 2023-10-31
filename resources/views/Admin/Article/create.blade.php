@@ -104,6 +104,8 @@
                                                 </option>
                                                 <option value="1" {{ old('link') == 1 ? 'selected' : '' }}>Video
                                                 </option>
+                                                <option value="2" {{ old('link') == 2 ? 'selected' : '' }}>YouTube
+                                                </option>
                                             </select>
                                             @error('image_type')
                                                 <span class="error">{{ $message }}</span>
@@ -132,16 +134,25 @@
                                         </div>
                                     </div>  --}}
 
-                                    <div class="form-group">
+                                    <div class="form-group ">
                                         <label class="col-lg-3 control-label" for="media">Article Media:</label>
-                                        <div class="col-lg-9">
+                                        <div class="col-lg-9 imageUploadData">
                                             <input type="file" class="file-styled" name="media" id="media"
                                                 value="{{ old('media') }}">
                                             @error('media')
                                                 <span class="error">{{ $message }}</span>
                                             @enderror
                                         </div>
+                                        <div class="col-lg-9 youtubeLink" style="display: none">
+                                            <input type="text" class="form-control" name="media" id="media"
+                                                value="{{ old('media') }}">
+                                            @error('media')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
                                     </div>
+
+
 
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="description">Article
@@ -228,6 +239,17 @@
                     description: {
                         required: 'Please enter article description.',
                     },
+                }
+            });
+
+            $('#image_type').change(function() {
+                var image_type = $(this).val();
+                if (image_type == 2) {
+                    $('.youtubeLink').css('display', 'block');
+                    $('.imageUploadData').css('display', 'none');
+                } else {
+                    $('.youtubeLink').css('display', 'none');
+                    $('.imageUploadData').css('display', 'block');
                 }
             });
 

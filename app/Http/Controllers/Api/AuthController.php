@@ -5,14 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Common\GeneralComponent;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Jobs\SendEmail;
 use App\Models\Business;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Notifications\SendOTPEmail;
-use App\Jobs\SendEmail;
 
 class AuthController extends Controller
 {
@@ -25,31 +24,24 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $rules = [
             'name' => 'nullable|string',
             'type' => 'required|in:email,mobile_number',
-            'email' => ['required_if:type,email', 'string', 'exists:users,email'],
-            'mobile_number' => ['required_if:type,mobile_number', 'digits_between:10,12'],
             'dial_code' => 'nullable|digits_between:1,4',
             'user_type' => 'required|in:Regular,Business',
-            // 'business_name' => ['required_if:user_type,Business', 'string', 'unique:businesses,business_name'],
-        ]);
-
-        // if ($request->type == 'mobile_number') {
-        //     $validator = Validator::make($request->all(), [
-        //         'email' => 'nullable|string|email|unique:users,email',
-        //     ]);
-        // }
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
-        }
+        ];
 
         if ($request->user_type == 'Business') {
-            $validator = Validator::make($request->all(), [
-                'business_name' => ['required', 'string', 'unique:businesses,business_name'],
-            ]);
+            $rules['business_name'] = 'required|string|unique:businesses,business_name';
         }
+
+        if ($request->type == 'email') {
+            $rules['email'] = 'required|email|exists:users,email';
+        } elseif ($request->type == 'mobile_number') {
+            $rules['mobile_number'] = 'required|digits_between:7,18|exists:users,mobile_number';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
@@ -121,15 +113,16 @@ class AuthController extends Controller
             $userOtp = 1234;
             $response = 200;
         }
-        //temp
-        // if ($email) {
-        //     $userOtp = 1234;
-        // }
+
         $expire_at = now()->addMinute(10);
         // user OTP Genrate And Send end
 
         if ($response == 200) {
             if ($email) {
+                if ($email == 'test@gmail.com') {
+                    $userOtp = 1234;
+                }
+
                 $user = User::where('email', $email)->first();
                 if ($user) {
                     $user->fill([
@@ -144,12 +137,15 @@ class AuthController extends Controller
                     ]);
                 }
                 // $user->notifyNow(new SendOTPEmail($userOtp));
-                SendEmail::dispatchSync( [
-                    'subject' => 'Send OTP '.config('app.name'),
-                    'data' => ['otp'=>$userOtp],
-                    'email' => $email,
-                    'view' => 'OTPEmail',
-                ]);
+                if ($email != 'test@gmail.com') {
+                    js_send_email( 'Send OTP ' . config('app.name'),  ['otp' => $userOtp], $email,'OTPEmail');
+                    // SendEmail::dispatchSync([
+                    //     'subject' => 'Send OTP ' . config('app.name'),
+                    //     'data' => ['otp' => $userOtp],
+                    //     'email' => $email,
+                    //     'view' => 'OTPEmail',
+                    // ]);
+                }
                 return $this->sendResponse(null, 'Your Email OTP Send SuccessFully');
             }
 

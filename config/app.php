@@ -172,9 +172,12 @@ return [
         /*
          * Package Service Providers...
          */
+        
         Yajra\DataTables\DataTablesServiceProvider::class,
         ProtoneMedia\LaravelFFMpeg\Support\ServiceProvider::class,
         Matthewbdaly\LaravelAzureStorage\AzureStorageServiceProvider::class,
+        App\Providers\HelperServiceProvider::class,
+
         /*
          * Application Service Providers...
          */

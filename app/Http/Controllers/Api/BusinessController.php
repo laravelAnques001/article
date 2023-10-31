@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\BusinessRatingReviewRequest;
+use App\Jobs\SendEmail;
+use App\Models\AdminNotification;
 use App\Models\Aminity;
 use App\Models\Business;
 use App\Models\BusinessRatingReview;
@@ -126,6 +127,20 @@ class BusinessController extends Controller
         $business = Business::create($validated);
         $business->service()->sync($services);
         $business->aminity()->sync($aminities);
+
+        $validated['user_name'] = isset($business->user->name)?$business->user->name:'';
+        js_send_email('Business Create : ' . $request->title,  $validated,  config('mail.from.address'),'businessAdmin');
+        // SendEmail::dispatchSync([
+        //     'subject' => 'Business Create : ' . $request->title,
+        //     'data' => $validated,
+        //     'email' => config('mail.from.address'),
+        //     'view' => 'businessAdmin',
+        // ]);
+
+        AdminNotification::create([
+            'title' => 'Business : ' . $validated['business_name'],
+            'description' => $validated['description'],
+        ]);
         return $this->sendResponse($business->id, 'Business Created Successfully.');
     }
 
@@ -231,9 +246,9 @@ class BusinessController extends Controller
         $validated = $request->all();
         $validator = Validator::make($validated, [
             'business_id' => 'required|exists:businesses,id',
-                'rating' => ['nullable', 'numeric', 'between:0.01,5', 'regex:/^\d+(\.\d{2})?$/'],
-                'review' => 'nullable|string',
-            ]);
+            'rating' => ['nullable', 'numeric', 'between:0.01,5', 'regex:/^\d+(\.\d{2})?$/'],
+            'review' => 'nullable|string',
+        ]);
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
@@ -285,12 +300,12 @@ class BusinessController extends Controller
                     $q->where('title', 'like', '%' . $search . '%');
                     $q->orWhere('company_name', 'like', '%' . $search . '%');
                 }])
-                ->with(['aminity' => function ($q) use($search) {
+                ->with(['aminity' => function ($q) use ($search) {
                     $q->select('id', 'name');
-                    $q->where('name','like','%'.$search.'%');
+                    $q->where('name', 'like', '%' . $search . '%');
                 }])
                 ->with(['subscriptionPlan' => function ($q) {
-                    $q->select('id', 'business_id', 'payment_response','subscription_plan_id');
+                    $q->select('id', 'business_id', 'payment_response', 'subscription_plan_id');
                 }])
                 ->with('ratingReview')
                 ->where('user_id', $user_id)
@@ -314,7 +329,7 @@ class BusinessController extends Controller
                     $q->select('id', 'title', 'company_name');
                 }])
                 ->with(['subscriptionPlan' => function ($q) {
-                    $q->select('id', 'business_id', 'payment_response','subscription_plan_id');
+                    $q->select('id', 'business_id', 'payment_response', 'subscription_plan_id');
                 }])
                 ->with(['aminity' => function ($q) {
                     $q->select('id', 'name');

@@ -37,9 +37,9 @@
                         class="icon-circle-right2 position-right"></i></button>
             </div>
 
-            <div class="text-center">
+            {{--  <div class="text-center">
                 <a href="{{ route('register') }}">Create New Account</a>
-            </div>
+            </div>  --}}
         </div>
     </form>
 @endsection

@@ -7,6 +7,8 @@ use App\Models\Enquiry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Jobs\SendEmail;
+use App\Models\AdminNotification;
 
 class EnquiryController extends Controller
 {
@@ -63,6 +65,20 @@ class EnquiryController extends Controller
         }
 
         $enquiry = Enquiry::create($validated);
+
+        // SendEmail::dispatchSync( [
+        //     'subject' => 'Enquiry : '.$request->name,
+        //     'data' => $validated,
+        //     'email' => config('mail.from.address'),
+        //     'view' => 'EnquiryAdmin',
+        // ]);
+        js_send_email( 'Enquiry : '.$request->name,  $validated,  config('mail.from.address'),'EnquiryAdmin');
+
+        AdminNotification::create([
+            'title'=>'Enquiry:'. $validated['name'],
+            'description'=>'Email : '.$validated['email']." Mobile No: ". $validated['mobile_number'],
+        ]);
+
         return $this->sendResponse($enquiry->id, 'Enquiry Created Successfully.');
     }
 

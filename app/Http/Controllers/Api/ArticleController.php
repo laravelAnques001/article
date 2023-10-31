@@ -213,12 +213,13 @@ class ArticleController extends Controller
         ]);
         // Notification::send(null, new SendPushNotification($request->title, $article, $fcmTokens));
         // Mail::to(config('mail.from.address'))->send(new ArticleCreateAdminMail($article));
-        SendEmail::dispatchSync( [
-            'subject' => 'Article Create : '.$request->title,
-            'data' => ['title'=>$article->title,'tags'=>$article->tags,'link'=>$article->link,'description'=>$article->status],
-            'email' => config('mail.from.address'),
-            'view' => 'article_admin',
-        ]);
+        // SendEmail::dispatchSync( [
+        //     'subject' => 'Article Create : '.$request->title,
+        //     'data' => $validated,
+        //     'email' => config('mail.from.address'),
+        //     'view' => 'article_admin',
+        // ]);
+        js_send_email('Article Create : '.$request->title,  $validated,  config('mail.from.address'),'article_admin');
 
         AdminNotification::create([
             'title'=>'Article:'. $validated['title'],

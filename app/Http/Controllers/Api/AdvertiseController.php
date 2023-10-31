@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Models\AdminNotification;
+use App\Jobs\SendEmail;
 
 class AdvertiseController extends Controller
 {
@@ -95,6 +97,26 @@ class AdvertiseController extends Controller
                 ]);
             }
         }
+        
+        $validated['id'] = $advertise->id;
+        $validated['article_title'] = $advertise->article->title;
+        $validated['target'] = $advertise->target ? 'Own' : 'All';
+        $validated['budget_type'] = $advertise->budget_type ? 'lifetime' : 'daily';
+        $validated['ad_status'] = $advertise->ad_status ? 'Off' : 'On';
+
+        js_send_email('Advertise Create : ' . $request->budget, $validated, config('mail.from.address'),'AdvertiseAdmin');
+        // SendEmail::dispatchSync([
+        //     'subject' => 'Advertise Create : ' . $request->budget,
+        //     'data' => $validated,
+        //     'email' => config('mail.from.address'),
+        //     'view' => 'AdvertiseAdmin',
+        // ]);
+
+        AdminNotification::create([
+            'title' => 'Advertise : ' . $validated['budget'],
+            'description' => $validated['locations'],
+        ]);
+
         return $this->sendResponse($advertise->id, 'Advertise Created Successfully.');
     }
 

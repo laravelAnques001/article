@@ -1,9 +1,14 @@
 <!-- Main navbar -->
+@php
+    $notification = \App\Models\AdminNotification::latest()
+        ->take(10)
+        ->get();
+@endphp
 <div class="navbar navbar-default header-highlight">
     <div class="navbar-header navbar-header-color">
         <a class="navbar-brand navbar-brand-header" href="#">
             {{--  <img src="{{ asset('assets/images/readwave_banner.png') }}" alt="">  --}}
-            <img src="{{ asset('assets/images/businessflipsbanner.jpeg') }}" alt="" width="200">
+            <img src="{{ asset('assets/images/business_white_banner.png') }}">
         </a>
 
         <ul class="nav navbar-nav visible-xs-block">
@@ -18,9 +23,36 @@
             </li>
         </ul>
         <div class="navbar-right">
-
             <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="icon-bell2"></i>
+                        <span class="visible-xs-inline-block position-right">Activity</span>
+                        <span class="status-mark border-pink-300"></span>
+                    </a>
+
+                    <div class="dropdown-menu dropdown-content">
+                        <ul class="media-list dropdown-content-body width-350">
+                            @foreach ($notification as $notify)
+                                <li class="media">
+                                    <div class="media-left">
+                                        <a href="#" class="btn bg-success-400 btn-rounded btn-icon btn-xs"><i
+                                                class="icon-bubble8"></i></a>
+                                    </div>
+                                    <div class="media-body">
+                                        <b>{{ $notify->title }}</b><br>
+                                        {{ $notify->description }}
+                                        {{--  <div class="media-annotation">4 minutes ago</div>  --}}
+                                        <div class="media-annotation">{{ $notify->ago}}</div>
+                                    </div>
+                                </li>
+                            @endforeach                         
+                        </ul>
+                    </div>
+                </li>
+
                 <li class="dropdown user user-menu nav-hide">
+
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <span class="hidden-xs">My Account</span>
                     </a>

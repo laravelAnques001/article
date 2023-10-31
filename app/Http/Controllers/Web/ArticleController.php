@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Web;
 use App\Common\AzureComponent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticleWebRequest;
-use App\Jobs\ArticleCreateFirebaseJob;
 use App\Jobs\ArticleApproveFirebase;
+use App\Jobs\ArticleCreateFirebaseJob;
 use App\Mail\ArticleApprovedUserMail;
-use App\Models\Article;
 use App\Models\AdminNotification;
+use App\Models\Article;
 use App\Models\ArticleNotification;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -55,11 +55,13 @@ class ArticleController extends Controller
     public function store(ArticleWebRequest $request)
     {
         $validated = $request->validated();
-        if ($image = $request->media) {
-            // $validated['media'] = $image->store('public/article');
-            $azure = new AzureComponent();
-            $mediaName = $azure->store($image);
-            $validated['media'] = config('app.azure') . "/uploads/readwave/$mediaName";
+        if($request->image_type != 2){
+            if ($image = $request->media) {
+                // $validated['media'] = $image->store('public/article');
+                $azure = new AzureComponent();
+                $mediaName = $azure->store($image);
+                $validated['media'] = config('app.azure') . "/uploads/readwave/$mediaName";
+            }
         }
         unset($validated['category_id']);
         $validated['status'] = 'Approved';
@@ -74,8 +76,8 @@ class ArticleController extends Controller
         ]);
 
         AdminNotification::create([
-            'title'=>'Article:'. $validated['title'],
-            'description'=>$validated['description'],
+            'title' => 'Article:' . $validated['title'],
+            'description' => $validated['description'],
         ]);
 
         return redirect()->route('article.index')->with('success', 'Article Created SuccessFully.');
@@ -231,7 +233,8 @@ class ArticleController extends Controller
     {
         $article = Article::where('id', base64_decode($id))->update(['status' => $status]);
         if ($article) {
-            ArticleApproveFirebase::dispatchSync($article);
+            $articleData = Article::find(base64_decode($id));
+            ArticleApproveFirebase::dispatchSync($articleData);
             echo 1;
         } else {
             echo 0;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Web\AdvertiseController;
 use App\Http\Controllers\Web\AminityController;
 use App\Http\Controllers\Web\ArticleController;
@@ -40,8 +41,12 @@ Route::get('/clear-cache', function () {
     return '<h1>Cache cleared</h1>';
 });
 
-Route::get('/', function () {
+Route::get('/administrator', function () {
     return view('auth.login');
+});
+
+Route::get('/', function () {
+    return view('index');
 });
 
 Auth::routes();
@@ -53,6 +58,16 @@ Route::get('privacy', function () {
 Route::get('term-condition', function () {
     return view('termCondition');
 });
+
+Route::get('privacy-policy', function () {
+    return view('privacy');
+});
+
+Route::get('terms-and-conditions', function () {
+    return view('termCondition');
+});
+
+Route::post('contact-us', [HomeController::class, 'contactUs'])->name('contactUs');
 
 Route::get('article-view/{id}', [ArticleController::class, 'articleView']);
 

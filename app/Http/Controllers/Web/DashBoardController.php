@@ -14,19 +14,19 @@ class DashBoardController extends Controller
 {
     public function dashboard()
     {
-        $article = Article::selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
+        $article = Article::selectRaw('status, COUNT(*) as count')->whereNull('deleted_at')->groupBy('status')->pluck('count', 'status')->toArray();
         $articleTotal = collect($article)->sum();
 
-        $advertise = Advertise::selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
+        $advertise = Advertise::selectRaw('status, COUNT(*) as count')->whereNull('deleted_at')->groupBy('status')->pluck('count', 'status')->toArray();
         $advertiseTotal = collect($advertise)->sum();
 
-        $subscriptionPlan = SubscriptionPlan::selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
+        $subscriptionPlan = SubscriptionPlan::selectRaw('status, COUNT(*) as count')->whereNull('deleted_at')->groupBy('status')->pluck('count', 'status')->toArray();
         $subscriptionPlanTotal = collect($subscriptionPlan)->sum();
 
-        $services = Services::selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
+        $services = Services::selectRaw('status, COUNT(*) as count')->whereNull('deleted_at')->groupBy('status')->pluck('count', 'status')->toArray();
         $servicesTotal = collect($services)->sum();
 
-        $business = Business::selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
+        $business = Business::selectRaw('status, COUNT(*) as count')->whereNull('deleted_at')->groupBy('status')->pluck('count', 'status')->toArray();
         $businessTotal = collect($business)->sum();
 
         $userActive = User::where('is_admin', 0)->whereNull('deleted_at')->count();

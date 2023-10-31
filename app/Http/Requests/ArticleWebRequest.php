@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+
 class ArticleWebRequest extends FormRequest
 {
     /**
@@ -23,10 +24,10 @@ class ArticleWebRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'title' => 'required|string',
             // 'link' => 'required|string',
-            'link' => ['required','regex:/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i'],
+            'link' => ['required', 'regex:/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i'],
             'tags' => 'required|string|min:3',
             'description' => 'required|string|min:3',
             'image_type' => 'nullable|in:0,1,2',
@@ -35,8 +36,13 @@ class ArticleWebRequest extends FormRequest
             'thumbnail' => 'nullable|string',
             'status' => 'nullable|in:In-Review,Approved,Rejected',
             'category_id' => 'required|array',
-            'category_id.*' => ['required', Rule::exists('categories', 'id')->whereNull('deleted_at')]
+            'category_id.*' => ['required', Rule::exists('categories', 'id')->whereNull('deleted_at')],
         ];
 
+        if ($this->input('image_type') == 2) {
+            $rules['media'] = 'nullable|string';
+        }
+
+        return $rules;
     }
 }

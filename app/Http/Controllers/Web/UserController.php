@@ -137,7 +137,7 @@ class UserController extends Controller
 
     public function getUserData()
     {
-        $data = User::orderBy('id', 'desc');
+        $data = User::where('is_admin',0)->orderBy('id', 'desc');
 
         return DataTables::of($data)
             ->addColumn('action', function ($data) {

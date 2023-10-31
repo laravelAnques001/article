@@ -38,7 +38,8 @@ class ArticleApproveFirebase implements ShouldQueue
         if ($firebaseToken) {
             $data = [
                 // 'to' => '/topics/broadcast-all',
-                "registration_ids" => $firebaseToken,
+                // "registration_ids" => $firebaseToken,
+                "token" => $firebaseToken,
                 "notification" => [
                     "title" => $this->article->status . ' : ' . $this->article->title,
                     "body" => $this->article->description,

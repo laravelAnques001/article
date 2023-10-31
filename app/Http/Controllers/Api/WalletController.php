@@ -7,8 +7,11 @@ use App\Http\Requests\WalletTransactionRequest;
 use App\Http\Resources\WalletResource;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Jobs\SendEmail;
+use App\Models\AdminNotification;
 
 class WalletController extends Controller
 {
@@ -29,9 +32,11 @@ class WalletController extends Controller
             })->orderByDesc('id')
             ->paginate(20);
         $user = User::find(auth()->id());
+        $minBalance = Setting::where('key','min_balance')->first();
         $success = [
             'wallet' => $wallet,
             'balance' => $user->balance,
+            'min_balance' => ((int) $minBalance->value),
         ];
         return $this->sendResponse($success, 'Wallet Record Get SuccessFully.');
     }
@@ -65,6 +70,29 @@ class WalletController extends Controller
         }
         $validated['user_id'] = $userId;
         $wallet = Wallet::create($validated);
+        $validated['user_name'] = isset($wallet->user->name) ? $wallet->user->name : null;
+
+        // if($email =isset($wallet->user->name) ? $wallet->user->name : null){
+        //     SendEmail::dispatchSync( [
+        //         'subject' => 'Wallet Balance Added : ',
+        //         'data' => $validated,
+        //         'email' => $email,
+        //         'view' => 'Wallet',
+        //     ]);
+        // }
+        js_send_email('Wallet Balance Added: '.$validated['user_name'],  $validated,  config('mail.from.address'),'Wallet');
+        // SendEmail::dispatchSync( [
+        //     'subject' => 'Wallet Balance Added: '.$validated['user_name'],
+        //     'data' => $validated,
+        //     'email' => config('mail.from.address'),
+        //     'view' => 'Wallet',
+        // ]);
+
+        AdminNotification::create([
+            'title'=>'Wallet Transaction ID:'. $validated['transaction_id'],
+            'description'=>$validated['payment_response'],
+        ]);
+
         return $this->sendResponse($wallet->id, 'Wallet Created SuccessFully.');
     }
 
