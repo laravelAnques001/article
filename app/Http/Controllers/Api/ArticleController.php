@@ -25,6 +25,7 @@ class ArticleController extends Controller
      */
     public function index(Request $request)
     {
+
         $search = isset($request->search) ? $request->search : null;
         $insights = isset($request->insights) ? $request->insights : null;
         $trending = isset($request->trending) ? $request->trending : null;
@@ -97,7 +98,7 @@ class ArticleController extends Controller
     {
         $userId = auth()->id();
         // $userCategory = CategoryUser::where('user_id', $userId)->pluck('category_id')->toArray();
-        return Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression', 'share')
+        return Article::select('id', 'title', 'link', 'tags', 'description', 'image_type', 'user_id', 'category_id', 'created_at', 'media', 'thumbnail', 'status', 'impression', 'share','type','post_images')
             ->with(['user' => function ($q) {
                 $q->select('name', 'email', 'id', 'image');
             }])
@@ -174,6 +175,8 @@ class ArticleController extends Controller
             'status' => 'nullable|in:In-Review,Approved,Rejected',
             'category_id.*' => 'required|exists:categories,id',
             'title' => 'required|string',
+            'type' => 'nullable|in:Post,Article',
+            'post_images'=> 'nullable'
         ]);
 
         if ($validator->fails()) {
@@ -271,6 +274,8 @@ class ArticleController extends Controller
             'status' => 'nullable|in:In-Review,Approved,Rejected',
             'category_id.*' => 'nullable|exists:categories,id',
             'title' => 'nullable|string',
+            'type' => 'nullable|in:Post,Article',
+            'post_images'=> 'nullable'
         ]);
 
         if ($validator->fails()) {

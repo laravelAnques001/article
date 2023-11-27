@@ -24,6 +24,8 @@ class Article extends Model
         'share',
         'deleted_at',
         'status',
+        'type',
+        'post_images'
     ];
 
     protected $appends = [

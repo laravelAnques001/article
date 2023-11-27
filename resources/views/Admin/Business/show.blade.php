@@ -45,6 +45,20 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="business_name">Business Number:</label>
+                                    <div class="col-lg-9">
+                                        <p class="form-control">{{ $business->user->mobile_number }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="business_name">Business Email:</label>
+                                    <div class="col-lg-9">
+                                        <p class="form-control">{{ $business->user->email }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
                                     <label class="col-lg-3 control-label" for="gst_number">GST Number:</label>
                                     <div class="col-lg-9">
                                         <p class="form-control">{{ $business->gst_number }}</p>

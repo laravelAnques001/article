@@ -60,6 +60,30 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="business_number">Business Number:</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" class="form-control" name="business_number"
+                                                id="business_number" placeholder="Enter Business Number"
+                                                value="{{ old('business_number', $business->user->mobile_number) }}" disable readonly>
+                                            @error('business_number')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-3 control-label" for="business_email">Business Email:</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" class="form-control" name="business_email"
+                                                id="business_email" placeholder="Enter Business Email"
+                                                value="{{ old('business_email', $business->user->email) }}" disable readonly>
+                                            @error('business_email')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
                                         <label class="col-lg-3 control-label" for="gst_number">GST Number:</label>
                                         <div class="col-lg-9">
                                             <input type="text" class="form-control" name="gst_number" id="gst_number"
@@ -90,7 +114,7 @@
                                         </div>
                                     </div>
 
-                                    
+
                                     <div class="form-group">
                                         <label class="col-lg-3 control-label" for="aminity_id">Select Aminities:</label>
                                         <div class="col-lg-9">

@@ -28,16 +28,32 @@ class WalletController extends Controller
             ->where('user_id', auth()->id())
             ->whereNull('deleted_at')
             ->when($start_date && $end_date, function ($q) use ($start_date, $end_date) {
-                $q->whereBetween('created_at', [$start_date, $end_date]);
+                    $q->whereDate('created_at', '>=', $start_date);
+                    $q->whereDate('created_at', '<=', $end_date);
+                // $q->whereBetween('created_at', [$start_date, $end_date]);
             })->orderByDesc('id')
             ->paginate(20);
         $user = User::find(auth()->id());
         $minBalance = Setting::where('key','min_balance')->first();
+
+        $payment_gateway = 'razor_pay';
+
+        if($payment_gateway == 'razor_pay'){
+            $key_data_obj = array();
+            $key_data_obj['key_id'] = "rzp_test_ti4Y8J92yBOpHY";
+            $key_data_obj['key_secret'] = "pgiCpg0LJ8Q6IixzXP7jqHu2";
+        }else{
+            $key_data_obj = array();
+        }
+
         $success = [
             'wallet' => $wallet,
             'balance' => $user->balance,
             'min_balance' => ((int) $minBalance->value),
+            'payment_gateway_type' => $payment_gateway,
+            'key_data' => $key_data_obj
         ];
+
         return $this->sendResponse($success, 'Wallet Record Get SuccessFully.');
     }
 
@@ -52,9 +68,15 @@ class WalletController extends Controller
     {
         $userId = auth()->id();
         $validated = $request->all();
+
+
+        if(isset($validated['payment_response']) && !empty($validated['payment_response'])){
+            $validated['payment_response'] = json_encode($validated['payment_response']);
+        }
+
         $validator = Validator::make($validated, [
             'transaction_id' => 'required|string',
-            'payment_response' => 'required|string',
+            'payment_response' => 'required|json',
             'status' => 'required|in:CANCEL,FAILURE,SUCCESS',
             'amount' => 'required|regex:/^\d*(\.\d{2})?$/',
         ]);

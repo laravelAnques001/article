@@ -29,7 +29,10 @@ class GeneralComponent
 
     public function sendSMSOtp($OTP = 1234, $mobileNumber, $textMessage = null)
     {
-        $message = isset($textMessage) ? $textMessage : "Hi, Your account OTP is $OTP. Welcome to Bizzbrains, Online Learning Platform. For any Query Call us - 8685868788";
+
+        $message ="Welcome to BusinessFlip, Product of Technolit Affluenza Pvt. Ltd. Your OTP is $OTP please enter in the app and proceed with the login process. Thanks";
+        
+        // $message = isset($textMessage) ? $textMessage : "Hi, Your account OTP is $OTP. Welcome to Bizzbrains, Online Learning Platform. For any Query Call us - 8685868788";
         if ($mobileNumber) {
             $postData = array(
                 'api_id' => config('constants.SMS_API_ID'),

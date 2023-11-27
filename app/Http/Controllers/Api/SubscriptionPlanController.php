@@ -29,6 +29,29 @@ class SubscriptionPlanController extends Controller
                 ->orderByDesc('id')
                 ->get();
         }
+
+
+        $payment_gateway = 'razor_pay';
+
+        if($payment_gateway == 'razor_pay'){
+            $key_data_obj = array();
+            $key_data_obj['key_id'] = "rzp_test_ti4Y8J92yBOpHY";
+            $key_data_obj['key_secret'] = "pgiCpg0LJ8Q6IixzXP7jqHu2";
+        }else{
+            $key_data_obj = array();
+        }
+
+        $success = [
+            'payment_gateway_type' => $payment_gateway,
+            'key_data' => $key_data_obj
+        ];
+
+        foreach($subscriptionPlan as $key => $subscriptionP){
+            $subscriptionPlan[$key]['payment_gateway_detail'] = $success;
+        }
+
+
+
         return $this->sendResponse($subscriptionPlan, 'Subscription Plan List Get Successfully.');
     }
 
@@ -47,10 +70,15 @@ class SubscriptionPlanController extends Controller
     public function subscriptionPlanPurchase(Request $request)
     {
         $validated = $request->all();
+
+        if(isset($validated['payment_response']) && !empty($validated['payment_response'])){
+            $validated['payment_response'] = json_encode($validated['payment_response']);
+        }
+
         $validator = Validator::make($validated, [
             'business_id' => 'required|exists:businesses,id',
             'subscription_plan_id' => 'required|exists:subscription_plans,id',
-            'payment_response' => 'required|string',
+            'payment_response' => 'required|json',
             'transaction_id' => 'required|string',
         ]);
 

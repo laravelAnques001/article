@@ -63,6 +63,10 @@ Route::get('privacy-policy', function () {
     return view('privacy');
 });
 
+Route::get('refund-policy', function () {
+    return view('refund');
+});
+
 Route::get('terms-and-conditions', function () {
     return view('termCondition');
 });

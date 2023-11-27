@@ -138,10 +138,10 @@ class AuthController extends Controller
                 }
                 // $user->notifyNow(new SendOTPEmail($userOtp));
                 if ($email != 'test@gmail.com') {
-                    js_send_email( 'Send OTP ' . config('app.name'),  ['otp' => $userOtp], $email,'OTPEmail');
+                    js_send_email( 'Send OTP ' . config('app.name'),  ['otp' => $userOtp,'user_name'=>$user->name], $email,'OTPEmail');
                     // SendEmail::dispatchSync([
                     //     'subject' => 'Send OTP ' . config('app.name'),
-                    //     'data' => ['otp' => $userOtp],
+                    //     'data' => ['otp' => $userOtp,'user_name'=>$user->name],
                     //     'email' => $email,
                     //     'view' => 'OTPEmail',
                     // ]);

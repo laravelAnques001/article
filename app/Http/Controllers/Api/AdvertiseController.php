@@ -51,7 +51,7 @@ class AdvertiseController extends Controller
                     $q->where('user_id', $userId);
                 })
                 ->whereNull('deleted_at')
-                ->where('status', 'Published')
+                // ->where('status', 'Published')
                 ->where('ad_status', 0)
                 ->orderByDesc('id')
                 ->paginate(10);
@@ -78,7 +78,7 @@ class AdvertiseController extends Controller
             'start_date' => 'nullable|date_format:Y-m-d H:i:s',
             'end_date' => 'nullable|date_format:Y-m-d H:i:s|after_or_equal:start_date',
             'target' => 'required|in:0,1',
-            'article_id' => 'required|in:0,1',
+            'article_id' => 'required|exists:articles,id',
         ]);
 
         if ($validator->fails()) {
@@ -97,7 +97,7 @@ class AdvertiseController extends Controller
                 ]);
             }
         }
-        
+
         $validated['id'] = $advertise->id;
         $validated['article_title'] = $advertise->article->title;
         $validated['target'] = $advertise->target ? 'Own' : 'All';
@@ -114,7 +114,7 @@ class AdvertiseController extends Controller
 
         AdminNotification::create([
             'title' => 'Advertise : ' . $validated['budget'],
-            'description' => $validated['locations'],
+            'description' => "Advertise Created.",
         ]);
 
         return $this->sendResponse($advertise->id, 'Advertise Created Successfully.');

@@ -18,5 +18,5 @@ return [
     'SMS_API_PASSWORD'=>'technolit300',
     'SMS_TYPE'=>'Transactional',
     'SMS_ENCODING'=>'Text',
-    'SENDER'=>'BIZZBR',
+    'SENDER'=>'TECHLT',
 ];

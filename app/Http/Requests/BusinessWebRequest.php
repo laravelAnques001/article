@@ -35,6 +35,8 @@ class BusinessWebRequest extends FormRequest
             'website' => 'nullable|string|url',
             'people_search' => 'nullable|string',
             'description' => 'nullable|string',
+            'business_number' => 'required|unique:users,email',
+            'business_email' => 'required|unique:users,mobile_number',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }

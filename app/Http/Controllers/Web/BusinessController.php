@@ -10,6 +10,7 @@ use App\Models\Business;
 use App\Models\Services;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\User;
 
 class BusinessController extends Controller
 {
@@ -44,7 +45,24 @@ class BusinessController extends Controller
      */
     public function store(BusinessWebRequest $request)
     {
+
         $validated = $request->validated();
+
+        //attach business with user
+        $user_details = User::where('email',$validated['business_email'])->first();
+        if(isset($user_details) && !empty($user_details)){
+            $validated['user_id'] = $user_details->id;
+        }else{
+
+            $user_data = array();
+            $user_data['email'] = $validated['business_email'];
+            $user_data['mobile_number'] = $validated['business_number'];
+            $user_details = User::create($user_data);
+            $validated['user_id'] = $user_details->id;
+        }
+
+
+
         $image_url = [];
         if (is_array($request->images) || is_object($request->images)) {
             foreach ($request->images as $image) {
@@ -59,10 +77,13 @@ class BusinessController extends Controller
         $aminities = $validated['aminity_id'];
         unset($validated['service_id']);
         unset($validated['aminity_id']);
-        $validated['user_id'] = auth()->id();
+        // $validated['user_id'] = auth()->id();
         $business = Business::create($validated);
         $business->service()->attach($servicesIds);
         $business->aminity()->attach($aminities);
+
+
+
         return redirect()->route('business.index')->with('success', 'Business Created SuccessFully.');
     }
 
@@ -88,7 +109,7 @@ class BusinessController extends Controller
      */
     public function edit($id)
     {
-        $business = Business::with('service')->whereNull('deleted_at')->find(base64_decode($id)) ?? abort(404);
+        $business = Business::with(['service','user'])->whereNull('deleted_at')->find(base64_decode($id)) ?? abort(404);
         $images = explode(',', $business->images);
         $services = Services::whereNull('deleted_at')->where('status', 'Active')->orderByDesc('id')->get();
         $aminities = Aminity::whereNull('deleted_at')->orderByDesc('id')->get();
@@ -151,7 +172,7 @@ class BusinessController extends Controller
 
     public function getData()
     {
-        $data = Business::whereNull('deleted_at')->orderBy('id', 'desc');
+        $data = Business::with('user')->whereNull('deleted_at')->orderBy('id', 'desc');
 
         return DataTables::of($data)
             ->addColumn('action', function ($data) {
@@ -181,7 +202,7 @@ class BusinessController extends Controller
                 return '<input type="checkbox" id="switcherySize2"  data-value="' . base64_encode($data->id) . '"  class="switchery switch" data-size="sm" ' . $checked . '  />';
             })
             ->editColumn('user_id', function ($data) {
-                return $data->user->name;
+                return $data->user->email;
             })
             ->rawColumns(['date', 'action', 'image', 'status'])
             ->addIndexColumn()
@@ -201,7 +222,7 @@ class BusinessController extends Controller
 
     public function businessView($id)
     {
-        $business = Business::with('service')->whereNull('deleted_at')->find(base64_decode($id)) ?? abort(404);
+        $business = Business::with(['service','user'])->whereNull('deleted_at')->find(base64_decode($id)) ?? abort(404);
         $images = explode(',', $business->images);
         return view('business', compact('business', 'images'));
     }
